@@ -1,0 +1,58 @@
+.ReactSpotifyWebPlayback {
+    height: 90%;
+    .player {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        width: 80%;
+    }
+
+    .buttonControls {
+        display: flex;
+        position: relative;
+        width: 100%;
+        justify-content: center;
+        align-items: center;
+    }
+    
+    .control:last-child {
+        position: absolute;
+        right: 30%;
+    }
+
+    .mediaPlayer {
+        padding: 10px !important;
+        width: 30vw;
+    }
+
+    .volumeSliderContainer {
+        display: flex;
+        justify-content: center;
+    }
+
+    .albumCoverContainer {
+        position: relative;
+        height: 30vw;
+        width: 30vw;
+    }
+    .albumCoverCurtain {
+        position: absolute;
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+    }
+
+    .albumCoverCurtain,
+    .albumCoverImage {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        // max-height: 500px;
+        // overflow: hidden;
+    }
+
+    .repeatingPixels {
+        background-color: black;
+    }
+}

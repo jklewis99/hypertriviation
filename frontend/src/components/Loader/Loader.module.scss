@@ -1,0 +1,45 @@
+.Loader {
+    position: relative;
+    height: 40vmin;
+    width: 40vmin;
+    // margin: 0 auto;
+    .centered {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        margin: auto;
+    }
+    .brainLoader {
+        height: 100%;
+    }
+
+    .brainVector {
+        height: 68%;
+        animation: expand_center 3s infinite linear;
+    }
+    @keyframes expand_center {
+        0% {
+            clip-path: circle(0%);
+        }
+        50% {
+            clip-path: circle(100%);
+        }
+        100% {
+            clip-path: circle(0%);
+        }
+    }
+
+    .jimmyNeutron {
+        animation: brainBlast 1s 1 linear;
+    }
+    @keyframes brainBlast {
+        0% {
+            transform: scale(0);
+        }
+        100% {
+            transform: scale(1);
+        }
+    }
+}

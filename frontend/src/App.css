@@ -1,0 +1,50 @@
+.App {
+  text-align: center;
+  color: white;
+}
+
+
+
+.App-header {
+  background-color: #282c34;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.App-link {
+  color: #61dafb;
+}
+
+.wallpaper {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url("assets/images/double-bubble-dark.png");
+    background-repeat: repeat;
+}
+
+.card-actions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-bottom: 20px;
+}
+
+.main-card {
+    max-width: 800px;
+    width: 80vw;
+    height: 90vh;
+    margin: auto;
+    transition: 0.3s;
+    border: 1px solid #000000;
+    box-shadow: 0 8px 40px -12px #00c3ffb7;
+    align-items: center;
+    justify-content: center;
+}

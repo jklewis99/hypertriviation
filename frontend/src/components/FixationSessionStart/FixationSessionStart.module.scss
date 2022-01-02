@@ -1,0 +1,18 @@
+.FixationSessionStart {
+
+    display: flex;
+    flex-direction: column;
+    margin: 20px;
+    align-items: center;
+    justify-content: center;
+
+    .cardContent {
+        border: 2px black;
+    }
+    .cardActions {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding-bottom: 20px;
+    }
+}

@@ -1,0 +1,54 @@
+.FixationSessionHost {
+    height: 80vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+
+    .playersTop {
+        flex-direction: row;
+    }
+
+    .startMiddleContainer {
+        display: flex;
+        flex-direction: row;
+
+        div {
+            padding: 20px;
+        }
+    }
+    .playersRight {
+        flex-direction: column;
+        flex-wrap: wrap;
+    }
+
+    .playersBottom {
+        flex-direction: row;
+    }
+
+    .playersLeft {
+        flex-direction: column-reverse;
+        flex-wrap: wrap-reverse;
+    }
+
+    .playersRight, .playersLeft {
+        min-width: 200px;
+        // width: fit-content;
+    }
+    .playersTop, .playersRight, .playersBottom, .playersLeft {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+
+        .playerCard {
+            width: 100px !important;
+            height: 60px !important;
+            margin: 20px;
+            padding: 10px;
+        }
+
+        .textBox {
+            text-overflow: ellipsis;
+        }
+    }
+}

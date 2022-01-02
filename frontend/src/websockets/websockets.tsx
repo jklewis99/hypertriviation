@@ -1,0 +1,1 @@
+export const webSocketConnectionString = "ws://localhost:8000/websockets"

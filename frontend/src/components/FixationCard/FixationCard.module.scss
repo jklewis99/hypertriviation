@@ -1,0 +1,83 @@
+.SessionCard {
+    cursor: pointer;
+
+    .flipCard {
+        background-color: transparent;
+        width: inherit;
+        height: 120px;
+        perspective: 1000px; /* 3D effect */
+    }
+
+    /* This container is needed to position the front and back side */
+    .flipCardInner {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        text-align: center;
+        transition: transform 0.8s;
+        transform-style: preserve-3d;
+    }
+
+    .flipCard:hover .flipCardInner {
+        transform: rotateY(180deg);
+    }
+
+    /* Do an horizontal flip when you move the mouse over the flip box container */
+    .flipCard:hover .flipCardInner {
+        transform: rotateX(180deg);
+    }
+
+    /* Position the front and back side */
+    .flipCardFront,
+    .flipCardBack {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        -webkit-backface-visibility: hidden; /* Safari */
+        backface-visibility: hidden;
+    }
+
+    /* Style the front side (fallback if image is missing) */
+    .flipCardFront {
+        background-color: #bbb;
+        color: black;
+    }
+
+    /* Style the back side */
+    .flipCardBack {
+        background-color: dodgerblue;
+        color: white;
+        transform: rotateX(180deg);
+    }
+
+    .cardInfoBackground {
+        // text-shadow: 2px 2px 0 #000000;
+        text-shadow: 1px 0 5px #000, 0 -1px 5px #000, 0 1px 5px #000, -1px 0 5px #000;
+        color: white;
+    }
+    .cardInfoBackground:hover {
+        // text-shadow: 2px 2px 0 #000000;
+        text-shadow: 1px 0 5px #000, 0 -1px 5px #000, 0 1px 5px #000, -1px 0 5px #000;
+        color: white;
+    }
+
+    .star {
+        color: #ffb006;
+        background-color: #000000ec;
+    }
+
+    .smallCard {
+        height: 60px;
+        width: 80px;
+    }
+
+    .mediumCard {
+        height: 120px;
+        width: 160px;
+    }
+
+    .largeCard {
+        height: 210px;
+        width: 280px;
+    }
+}

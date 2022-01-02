@@ -1,0 +1,19 @@
+.FixationSettings {
+
+    .timeLimitOptions {
+        display: flex;
+    }
+
+    .selectDropdown {
+        // margin-top: 20px;
+        margin-left: -50%;
+        margin-right: auto;
+
+    }
+    .bottomButtons {
+        justify-content: space-between;
+        margin-top: auto;
+        padding: 10px;
+        width: 100%;
+    }
+}

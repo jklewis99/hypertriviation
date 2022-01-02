@@ -1,0 +1,31 @@
+.FixationView {
+    .card,
+    .cardBlock {
+        max-width: 800px;
+        width: 80vw;
+        height: 90vh;
+        margin: auto;
+    }
+    .card {
+        transition: 0.3s;
+        border: 1px solid #000000;
+        box-shadow: 0 8px 40px -12px #00c3ffb7;
+        align-items: center;
+        justify-content: center;
+    }
+    .cardBlock {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background-color: #000000e5;
+        // box-shadow: 0 16px 40px -12px #000000b7;
+        // border: 1px solid;
+    }
+    .bottomButtons {
+        justify-content: space-between;
+        // padding: 4px;
+        // margin: 0 20px;
+        // flex-grow: 1;
+    }
+}
