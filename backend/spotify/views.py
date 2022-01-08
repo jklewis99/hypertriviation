@@ -3,7 +3,7 @@ from django.shortcuts import render, redirect
 from authentication.models import HypertriviationUser
 from authentication.serializers import HypertrviationUserSerializer
 from global_utils.token_decrypt import decrypt_auth_header
-from .credentials import REDIRECT_URI, CLIENT_SECRET, CLIENT_ID
+from appsettings import REDIRECT_URI, CLIENT_SECRET, CLIENT_ID
 from rest_framework.views import APIView
 from requests import Request, post
 from rest_framework import status
