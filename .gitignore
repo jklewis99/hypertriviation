@@ -177,3 +177,5 @@ cython_debug/
 
 */appsettings.py
 **/migrations/**
+!**/migrations
+!**/migrations/__init__.py
