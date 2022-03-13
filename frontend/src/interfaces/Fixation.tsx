@@ -5,6 +5,9 @@ export interface Fixation {
   description?: string;
   category: string;
   imgUrl: string;
+  keepShuffled: boolean;
+  spotifyPlaylistId: string;
+  questionCount: number;
   rating: number;
   createdAt: string;
 }

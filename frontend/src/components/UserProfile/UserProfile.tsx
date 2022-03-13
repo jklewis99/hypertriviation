@@ -75,12 +75,15 @@ const UserProfile = (props: UserProfileProps) => {
 
   const getMyPlaylists = () => {
     getPlaylists(user.id).then((response: any) => {
-      debugger;
       console.log(response);
     })
     .catch((error: Error) => {
       console.log(error);
     })
+  }
+
+  const goToHome = () => {
+    navigate('/')
   }
   return (
     <div className={styles.UserForm} data-testid="UserProfile">
@@ -145,6 +148,9 @@ const UserProfile = (props: UserProfileProps) => {
           </Button>
         </div>
       </Card>
+      <Button className={styles.homeButton} variant="contained" color="primary" onClick={goToHome}>
+        Home
+      </Button>
     </div>
   );
 }

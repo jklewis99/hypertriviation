@@ -3,6 +3,7 @@ import string
 import random
 import uuid
 import math
+from authentication.models import HypertriviationUser
 
 def generate_unique_code(length=8):
 
@@ -54,11 +55,16 @@ class Fixation(models.Model):
     """
     Stores a single fixation entry, which defines the trivia session
     """
-    created_by = models.ForeignKey(User, on_delete=models.CASCADE)
+    created_by = models.ForeignKey(HypertriviationUser, on_delete=models.CASCADE)
     fixation_title = models.CharField(max_length=50, unique=False)
     category = models.TextField(choices=FixationCategory.choices, default=FixationCategory.OTHER)
     description = models.CharField(max_length=240, null=True)
     img_url = models.CharField(max_length=1000, null=True) # change this
+    keep_shuffled = models.BooleanField(default=True)
+    spotify_playlist_id = models.CharField(max_length=128, null=True)
+    spotify_random_start_ind = models.BooleanField(default=True)
+    default_duration = models.IntegerField(null=False, default=10)
+    question_count = models.IntegerField(null=False, default=0)
     rating = models.FloatField(null=False, default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -67,6 +73,38 @@ class Fixation(models.Model):
     def __str__(self):
         return self.fixation_title
 
+class FixationQuestion(models.Model):
+    """
+    Stores a single fixation question entry, which defines the fixation question
+    """
+    fixation = models.ForeignKey(Fixation, null=True, on_delete=models.CASCADE)
+    question_idx = models.IntegerField(null=False)
+    question_txt = models.CharField(max_length=512, null=False)
+    multiple_choice_ind = models.BooleanField(default=True)
+    img_url = models.CharField(max_length=512, null=True)
+    video_playback_url = models.CharField(max_length=512, null=True)
+    created_by = models.ForeignKey(HypertriviationUser, on_delete=models.CASCADE)
+    question_category = models.CharField(max_length=128, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.question_txt
+
+class FixationAnswer(models.Model):
+    """
+    Stores a single fixation answer entry, which defines a possible fixation answer
+    """
+    question = models.ForeignKey(FixationQuestion, null=True, on_delete=models.CASCADE)
+    answer_txt = models.CharField(max_length=512, null=False)
+    correct_answer_ind = models.BooleanField(default=True)
+    created_by = models.ForeignKey(HypertriviationUser, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.answer_txt
+
 class FixationSession(models.Model):
     """
     Stores a single fixation session entry, which continas the real time metadata for a trivia session
@@ -74,7 +112,7 @@ class FixationSession(models.Model):
     code = models.CharField(
         max_length=8, default=generate_unique_code, unique=True)
     host = models.CharField(max_length=64, unique=True)
-    hosted_by = models.ForeignKey(User, null=False, on_delete=models.CASCADE)
+    hosted_by = models.ForeignKey(HypertriviationUser, null=False, on_delete=models.CASCADE)
     fixation = models.ForeignKey(Fixation, null=True, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     current_song = models.CharField(max_length=64, null=True)

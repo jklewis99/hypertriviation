@@ -1,6 +1,9 @@
 import axios from "axios"
 import camelCaseKeys from "camelcase-keys"
 import { useNavigate } from 'react-router-dom';
+import { baseUrl } from "./constants";
+
+var retryCount = 0;
 
 const httpClient = axios.create({
   baseURL: "http://127.0.0.1:8000/",
@@ -25,18 +28,23 @@ httpClient.interceptors.response.use(
   function (error) {
     const originalRequest = error.config;
     if (error.response.status === 401 && error.response.statusText === "Unauthorized") {
-      // if (originalRequest._retry) {
-      //   debugger;
-      //   useNavigate()("http://localhost:3000/user"); // TODO: change this
-      // }
       const refreshToken = localStorage.getItem('refreshToken');
       originalRequest._retry = true;
+      // handle when refresh token expires
+      if (retryCount > 5) {
+        debugger;
+        localStorage.removeItem('refreshToken');
+        window.location.href = baseUrl + "/user/access"; // TODO: change this
+        retryCount = 0;
+        return;
+      }
+      retryCount++;
       return httpClient
         .post('authapi/token/refresh/', { refresh: refreshToken })
         .then((response) => {
-          // debugger;
           localStorage.setItem('accessToken', response.data.access);
           localStorage.setItem('refreshToken', response.data.refresh);
+          retryCount = 0;
 
           httpClient.defaults.headers.common['Authorization'] = "Bearer " + response.data.access;
           originalRequest.headers['Authorization'] = "Bearer " + response.data.access;

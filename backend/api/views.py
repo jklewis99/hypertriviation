@@ -2,8 +2,9 @@ from django.shortcuts import render
 from rest_framework import generics, status
 
 from api.db_helper import join_room
-from .serializers import FixationSerializer, FixationSessionSerializer, FixationSessionSettingsSerializer, GetFixationSessionPlayersSerializer, RoomSerializer, CreateRoomSerializer, StartFixationSessionSerializer, UpdateRoomSerializer, UserSerializer
-from .models import Fixation, FixationSession, FixationSessionPlayer, FixationSessionSettings, Room, User
+from authentication.models import HypertriviationUser
+from .serializers import FixationAnswerSerializer, FixationQuestionSerializer, FixationSerializer, FixationSessionSerializer, FixationSessionSettingsSerializer, GetFixationSessionPlayersSerializer, RoomSerializer, CreateRoomSerializer, StartFixationSessionSerializer, UpdateRoomSerializer, UserSerializer
+from .models import Fixation, FixationAnswer, FixationQuestion, FixationSession, FixationSessionPlayer, FixationSessionSettings, Room, User
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.http import JsonResponse
@@ -173,6 +174,30 @@ class GetFixation(APIView):
 
         return Response({'Bad Request': 'Id paramater not found in request'}, status=status.HTTP_400_BAD_REQUEST)
 
+class GetFixationQuestion(APIView):
+    serializer_class = FixationQuestionSerializer
+    def get(self, request, question_id=None, format=None, *args, **kwargs):
+        if question_id != None:
+            fixation_question = FixationQuestion.objects.filter(id=question_id)
+            if fixation_question.exists():
+                data = FixationQuestionSerializer(fixation_question[0]).data
+                return Response(data, status=status.HTTP_200_OK)
+            return Response({'Question Instance Not Found': 'Invalid id.'}, status=status.HTTP_404_NOT_FOUND)
+
+        return Response({'Bad Request': 'Id paramater not found in request'}, status=status.HTTP_400_BAD_REQUEST)
+
+class GetFixationAnswers(APIView):
+    serializer_class = FixationAnswerSerializer
+    def get(self, request, question_id=None, format=None, *args, **kwargs):
+        if question_id != None:
+            question = FixationQuestion.objects.filter(id=question_id)
+            if question.exists():
+                data = FixationAnswerSerializer(FixationAnswer.objects.filter(question=question[0]), many=True).data
+                return Response(data, status=status.HTTP_200_OK)
+            return Response({'Answers Not Found': 'Invalid id.'}, status=status.HTTP_404_NOT_FOUND)
+
+        return Response({'Bad Request': 'Question Id paramater not found in request'}, status=status.HTTP_400_BAD_REQUEST)
+
 class StartFixationSession(APIView):
     serializer_class = StartFixationSessionSerializer
 
@@ -187,7 +212,7 @@ class StartFixationSession(APIView):
             host = self.request.session.session_key
             fixation_session = FixationSession.objects.filter(host=host)
             fixation_referenced = Fixation.objects.filter(id=fixation_id)
-            hosted_by = User.objects.filter(id=user_id)
+            hosted_by = HypertriviationUser.objects.filter(id=user_id)
             print(fixation_id)
             if fixation_session.exists():
                 fixation_session = fixation_session[0]
@@ -263,7 +288,6 @@ class SetFixationSessionSettings(APIView):
                             status=status.HTTP_404_NOT_FOUND)
 
         return Response({'Bad Request': 'code not found in request'}, status=status.HTTP_400_BAD_REQUEST)
-
 
 class GetFixationSessionPlayers(APIView):
     serializer_class = GetFixationSessionPlayersSerializer

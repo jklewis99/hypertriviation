@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Fixation, FixationSession, FixationSessionPlayer, FixationSessionSettings, Room, User
+from .models import Fixation, FixationAnswer, FixationQuestion, FixationSession, FixationSessionPlayer, FixationSessionSettings, Room, User
 
 
 class RoomSerializer(serializers.ModelSerializer):
@@ -31,7 +31,54 @@ class FixationSerializer(serializers.ModelSerializer):
     created_by = serializers.CharField(source='created_by.username')
     class Meta:
         model = Fixation
-        fields = ('id', 'created_by', 'fixation_title', 'description', 'category', 'img_url', 'rating', 'created_at')
+        fields = (
+            'id',
+            'created_by',
+            'fixation_title',
+            'category',
+            'description',
+            'img_url',
+            'keep_shuffled',
+            'spotify_playlist_id',
+            'spotify_random_start_ind',
+            'default_duration',
+            'question_count',
+            'rating',
+            'created_at',
+            'updated_at'
+        )
+
+class FixationQuestionSerializer(serializers.ModelSerializer):
+    fixation_id = serializers.CharField(source='fixation.id')
+    class Meta:
+        model = FixationQuestion
+        fields = (
+            'id',
+            'fixation_id',
+            'question_idx', 
+            'question_txt',
+            'multiple_choice_ind', 
+            'img_url',
+            'video_playback_url',
+            'created_by',
+            'question_category',
+            'created_at', 
+            'updated_at'
+        )
+
+class FixationAnswerSerializer(serializers.ModelSerializer):
+    question_id = serializers.CharField(source='question.id')
+    class Meta:
+        model = FixationAnswer
+        fields = (
+            'id',
+            'question_id',
+            'answer_txt',
+            'correct_answer_ind',
+            'created_by',
+            'created_at', 
+            'updated_at'
+        )
 
 class FixationSessionSerializer(serializers.ModelSerializer):
     fixation_id = serializers.CharField(source='fixation.id')

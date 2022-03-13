@@ -4,6 +4,7 @@
 export const spotifyAuthenticated = "spotifyAuthenticated";
 export const accessToken = "accessToken";
 export const refreshToken = "refreshToken";
+export const baseUrl = "http://localhost:3000";
 
 export const idConstants = {
   playToggle: "playback-toggle",

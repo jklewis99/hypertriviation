@@ -81,7 +81,6 @@ const AppRouter = () => {
   const authenticateSpotify = (userId: number) => {
     checkAuthentication(userId)
       .then((data) => {
-        debugger;
         console.log(data.status);
         setIsSpotifyAuthenticated(data.status);
         if (!data.status) {

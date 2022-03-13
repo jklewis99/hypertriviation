@@ -32,6 +32,7 @@ const FixationView = (props: FixationViewProps) => {
         setFixationSessionSettings(fixationSessionSettings)
           .then((settings) => {
             console.log(settings);
+            debugger;
             navigate(`/fixations/session/${session.code}`, { state: session });
           })
           .catch((error: Error) => setErrorMessage(error.message))

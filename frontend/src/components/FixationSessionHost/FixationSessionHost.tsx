@@ -4,7 +4,7 @@ import { useLocation } from 'react-router-dom';
 import { FixationSession } from '../../interfaces/FixationSession';
 import FixationSessionStart from '../FixationSessionStart/FixationSessionStart';
 import { FixationSessionHostProps } from '../../interfaces/props/FixationSessionHost.props';
-import { getFixationPlayers } from '../../services/fixation.service';
+import { getFixation, getFixationPlayers, getFixationQuestion, getFixationQuestionAnswers } from '../../services/fixation.service';
 import { FixationSessionPlayer } from '../../interfaces/FixationSessionPlayer';
 import { JoinRoomReceivedEventPayload, SocketEventReceived } from '../../interfaces/websockets/SocketEvents';
 import { Card, CardContent, Grid, Typography } from '@mui/material';
@@ -19,6 +19,7 @@ const FixationSessionHost = (props: FixationSessionHostProps) => {
   const fixationSession: FixationSession = useLocation().state;
   const webSocket = useRef<WebSocket>(props.webSocket);
   const [joinedUsers, setJoinedUsers] = useState<FixationSessionPlayer[]>([]);
+  const [playlistId, setPlaylistId] = useState<string>();
 
   const handleAllUsersJoined = () => {
     setIsWaitingToStart(false);
@@ -34,9 +35,28 @@ const FixationSessionHost = (props: FixationSessionHostProps) => {
     getFixationPlayers(fixationSession.code)
       .then((users) => {
         console.log(users);
-        setJoinedUsers([...joinedUsers, ...users])
+        setPlaylistId("")
       })
-      .catch((error: Error) => setErrorMessage(error.message))
+      .catch((error: Error) => setErrorMessage(error.message));
+      
+    getFixation(fixationSession.fixationId)
+      .then((response) => {
+        console.log(response);
+        setPlaylistId(response.spotifyPlaylistId);
+      })
+      .catch((error: Error) => setErrorMessage(error.message));
+
+    getFixationQuestion(1)
+      .then((response) => {
+        console.log(response);
+      })
+      .catch((error: Error) => console.log(error));
+
+    getFixationQuestionAnswers(1)
+      .then((response) => {
+        console.log(response);
+      })
+      .catch((error: Error) => console.log(error));
   }, [])
   useEffect(() => {
     webSocket.current.onmessage = (event) => {
@@ -131,10 +151,17 @@ const FixationSessionHost = (props: FixationSessionHostProps) => {
       </div>
     );
   }
+  if (playlistId != "") {
+    return (
+      <div className={styles.FixationSessionHost} data-testid="FixationSessionHost">
+        {`spotify:playlist:${playlistId}`}
+        <MusicPlayer spotifyUri={`spotify:playlist:${playlistId}`}/>
+      </div>
+    );
+  }
   return (
     <div className={styles.FixationSessionHost} data-testid="FixationSessionHost">
       Session is starting...
-      <MusicPlayer spotifyUri={"spotify:playlist:1lDeSYtMVO3KbOYn1GJvD7"}/>
     </div>
   );
 }
