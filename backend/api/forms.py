@@ -1,7 +1,9 @@
 from django import forms
 from django.forms import ModelForm
 
-from backend.api.models import Fixation, FixationAnswer, User, FixationQuestion
+from authentication.models import HypertriviationUser
+
+from .models import Fixation, FixationAnswer, User, FixationQuestion
 
 class FixationForm(forms.Form):
 
@@ -31,6 +33,14 @@ class FixationForm(forms.Form):
 
 class FixationQuestionForm(forms.Form):
 
+    fixation = forms.ModelChoiceField(Fixation.objects.all())
+    question_idx = forms.IntegerField()
+    question_txt = forms.CharField(max_length=512)
+    multiple_choice_ind = forms.BooleanField(required=False)
+    img_url = forms.CharField(max_length=512, required=False)
+    video_playback_url = forms.CharField(max_length=512, required=False)
+    created_by = forms.ModelChoiceField(HypertriviationUser.objects.all())
+    question_category = forms.CharField(max_length=128, required=False)
     class Meta:
         model = FixationQuestion
         fields = (
@@ -47,9 +57,9 @@ class FixationQuestionForm(forms.Form):
         )
     
     def __init__(self, *args, **kwargs):
-        fixation_id = kwargs.pop('fixation_id', '')
-        super(FixationForm, self).__init__(*args, **kwargs)
-        self.fields['fixation'] = forms.ModelChoiceField(queryset=Fixation.objects.filter(id=fixation_id))
+        # fixation_id = kwargs.pop('fixation_id', '')
+        super(FixationQuestionForm, self).__init__(*args, **kwargs)
+        # self.fields['fixation'] = forms.ModelChoiceField(queryset=Fixation.objects.filter(id=fixation_id))
 
 class FixationAnswerForm(forms.Form):
 
@@ -66,5 +76,5 @@ class FixationAnswerForm(forms.Form):
     
     def __init__(self, *args, **kwargs):
         fixation_id = kwargs.pop('fixation_id', '')
-        super(FixationForm, self).__init__(*args, **kwargs)
+        super(FixationAnswerForm, self).__init__(*args, **kwargs)
         self.fields['fixation'] = forms.ModelChoiceField(queryset=Fixation.objects.filter(id=fixation_id))

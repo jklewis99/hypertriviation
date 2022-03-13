@@ -3,6 +3,7 @@ from rest_framework import generics, status
 
 from api.db_helper import join_room
 from authentication.models import HypertriviationUser
+from .forms import FixationQuestionForm
 from .serializers import FixationAnswerSerializer, FixationQuestionSerializer, FixationSerializer, FixationSessionSerializer, FixationSessionSettingsSerializer, GetFixationSessionPlayersSerializer, RoomSerializer, CreateRoomSerializer, StartFixationSessionSerializer, UpdateRoomSerializer, UserSerializer
 from .models import Fixation, FixationAnswer, FixationQuestion, FixationSession, FixationSessionPlayer, FixationSessionSettings, Room, User
 from rest_framework.views import APIView
@@ -176,15 +177,35 @@ class GetFixation(APIView):
 
 class GetFixationQuestion(APIView):
     serializer_class = FixationQuestionSerializer
-    def get(self, request, question_id=None, format=None, *args, **kwargs):
-        if question_id != None:
-            fixation_question = FixationQuestion.objects.filter(id=question_id)
+    def get(self, request, format=None, *args, **kwargs):
+        if request.question_id != None:
+            fixation_question = FixationQuestion.objects.filter(id=request.question_id)
             if fixation_question.exists():
                 data = FixationQuestionSerializer(fixation_question[0]).data
                 return Response(data, status=status.HTTP_200_OK)
             return Response({'Question Instance Not Found': 'Invalid id.'}, status=status.HTTP_404_NOT_FOUND)
 
         return Response({'Bad Request': 'Id paramater not found in request'}, status=status.HTTP_400_BAD_REQUEST)
+    
+    def post(self, request, format=None):
+        # request.data.get('title')
+        form = FixationQuestionForm(request.POST)
+        if form.is_valid():
+            print(form.cleaned_data)
+            fixation_question = FixationQuestion(
+                fixation=form.cleaned_data.get("fixation"),
+                question_idx=form.cleaned_data.get("question_idx"),
+                question_txt=form.cleaned_data.get("question_txt"),
+                multiple_choice_ind=form.cleaned_data.get("multiple_choice_ind"),
+                img_url=form.cleaned_data.get("img_url"),
+                video_playback_url=form.cleaned_data.get("video_playback_url"),
+                created_by=form.cleaned_data.get("created_by"),
+                question_category=form.cleaned_data.get("question_category")
+            ) # TODO: pass settings
+            fixation_question.save()
+            return Response({f'Question created for {form.cleaned_data.get("fixation")}'}, status=status.HTTP_201_CREATED)
+        
+        return Response({'Bad Request': form.errors}, status=status.HTTP_400_BAD_REQUEST)
 
 class GetFixationAnswers(APIView):
     serializer_class = FixationAnswerSerializer
