@@ -1,12 +1,15 @@
 import { Button, Card, CardActions, CardContent, CardHeader, Divider, FormControl, FormControlLabel, FormGroup, Input, InputLabel, Switch, TextField, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { PlaylistsResponse } from '../../interfaces/payloads/Playlists.payload';
 import { SetFixationSessionSettings } from '../../interfaces/payloads/SetFixationSessionSettings.payload';
+import { createFixation } from '../../services/fixation.service';
 import { getPlaylists } from '../../services/spotify.service';
 import FixationSettings from '../FixationSettings/FixationSettings';
 import styles from './FixationCreate.module.scss';
 
 const FixationCreate = () => {
+  const navigate = useNavigate();
   const [fixationCategory, setFixationCategory] = useState<string>();
   const [newFixationValues, setNewFixationValues] = useState({
     title: "",
@@ -62,6 +65,13 @@ const FixationCreate = () => {
       time_limit: newFixationSettings.timeLimit
     };
     console.log(fixationSettings);
+    createFixation(newFixationValues)
+      .then((fixation) => {
+        navigate(`/fixations/create/${fixation.id}`, { state: fixation });
+      })
+      .catch((error: Error) => {
+        console.log(error.message);
+      });
     // props.startFixationCallback(fixationSettings);
   }
 

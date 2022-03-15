@@ -22,6 +22,7 @@ import UserProfile from '../UserProfile/UserProfile';
 import { accessToken, refreshToken, spotifyAuthenticated } from '../../utils/constants';
 import { getUser } from '../../services/user.service';
 import FixationCreate from '../FixationCreate/FixationCreate';
+import FixationQuestionCreate from '../FixationQuestionCreate/FixationQuestionCreate';
 
 const AppRouter = () => {
   const [isSpotifyAuthenticated, setIsSpotifyAuthenticated] = useState<boolean>(false);
@@ -104,21 +105,15 @@ const AppRouter = () => {
         <Routes>
           <Route path="/" element={<Welcome isLoggedIn={isLoggedIn}/>}>
           </Route>
-          {/* <Route path="/join" element={<RoomJoinPage/>} /> */}
           <Route path="/fixations/create" element={<FixationCreate />} />
+          <Route path="/fixations/create/:fixationId" element={<FixationQuestionCreate />} />
           <Route path="/fixations/list" element={<FixationList />} />
           <Route path="/fixations/:roomName" element={<FixationView isSpotifyAuthenticated={isSpotifyAuthenticated} />} />
           <Route path="/fixations/session/:code" element={<FixationSessionHost webSocket={webSocket} isSpotifyAuthenticated={isSpotifyAuthenticated}/>} />
           <Route path="/live" element={<PlayerFixation webSocket={webSocket}/>} />
           <Route path="/user/access" element={<UserForm/>}/>
           <Route path="/user/myaccount" element={<UserProfile handleSpotifyAuthenticationCallback={authenticateSpotify}/>}/>
-          {/* <Route path="/:code" element={<FixationSession/>} /> */}
-          {/* <Route
-            path="/room/:roomCode"
-            render={(props) => {
-              return <Room {...props} leaveRoomCallback={this.clearRoomCode} />;
-            }}
-          /> */}
+          
         </Routes>
       </Router>
     </div>

@@ -55,7 +55,7 @@ class Fixation(models.Model):
     """
     Stores a single fixation entry, which defines the trivia session
     """
-    created_by = models.ForeignKey(HypertriviationUser, on_delete=models.CASCADE)
+    created_by = models.ForeignKey(HypertriviationUser, on_delete=models.CASCADE, null=False)
     fixation_title = models.CharField(max_length=50, unique=False)
     category = models.TextField(choices=FixationCategory.choices, default=FixationCategory.OTHER)
     description = models.CharField(max_length=240, null=True)

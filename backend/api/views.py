@@ -1,11 +1,12 @@
+import json
 from django.shortcuts import render
 from rest_framework import generics, status
 
 from api.db_helper import join_room
 from authentication.models import HypertriviationUser
-from .forms import FixationQuestionForm
+from .forms import FixationForm, FixationQuestionForm
 from .serializers import FixationAnswerSerializer, FixationQuestionSerializer, FixationSerializer, FixationSessionSerializer, FixationSessionSettingsSerializer, GetFixationSessionPlayersSerializer, RoomSerializer, CreateRoomSerializer, StartFixationSessionSerializer, UpdateRoomSerializer, UserSerializer
-from .models import Fixation, FixationAnswer, FixationQuestion, FixationSession, FixationSessionPlayer, FixationSessionSettings, Room, User
+from .models import Fixation, FixationAnswer, FixationCategory, FixationQuestion, FixationSession, FixationSessionPlayer, FixationSessionSettings, Room, User
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.http import JsonResponse
@@ -146,21 +147,25 @@ class CreateFixation(APIView):
     serializer_class = FixationSerializer
 
     def post(self, request, format=None):
-        if not self.request.session.exists(self.request.session.session_key):
-            self.request.session.create()
-        title = request.data.get('title')
-        type = request.data.get('type')
-        description = request.data.get('description')
-        img_url = request.data.get('img_url')
-        settings = request.data.get('settings')
-        serializer = self.serializer_class(data=request.data)
-        if serializer.is_valid():
-
-            fixation = Fixation()
+        form = FixationForm(json.loads(request.body))
+        # print(request.body)
+        if form.is_valid():
+            print(form.cleaned_data)
+            fixation = Fixation(
+                created_by = form.cleaned_data.get("created_by"),
+                fixation_title = form.cleaned_data.get("fixation_title"),
+                category = form.cleaned_data.get("category") or FixationCategory.OTHER,
+                description = form.cleaned_data.get("description"),
+                img_url = form.cleaned_data.get("img_url"),
+                keep_shuffled = form.cleaned_data.get("keep_shuffled"),
+                spotify_playlist_id = form.cleaned_data.get("spotify_playlist_id"),
+                spotify_random_start_ind = form.cleaned_data.get("spotify_random_start_ind"),
+                default_duration = form.cleaned_data.get("default_duration") or 10
+            )
             fixation.save();
             return Response(FixationSerializer(fixation).data, status=status.HTTP_201_CREATED)               
 
-        return Response({'Bad Request': 'Request data is in valid'}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({'Bad Request': form.errors}, status=status.HTTP_400_BAD_REQUEST)
 
 class GetFixation(APIView):
     serializer_class = FixationSerializer
@@ -189,7 +194,7 @@ class GetFixationQuestion(APIView):
     
     def post(self, request, format=None):
         # request.data.get('title')
-        form = FixationQuestionForm(request.POST)
+        form = FixationQuestionForm(json.loads(request.body))
         if form.is_valid():
             print(form.cleaned_data)
             fixation_question = FixationQuestion(

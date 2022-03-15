@@ -8,6 +8,6 @@ export interface FixationQuestion {
   videoPlaybackUrl: string;
   createdBy: number;
   questionCategory: string;
-  createdAt: string;
-  updatedAt: string;
+  createdAt?: string;
+  updatedAt?: string;
 }

@@ -5,7 +5,7 @@ from .views import *
 
 urlpatterns = [
     path('fixations', Fixations.as_view()),
-    path('fixations/create', JoinRoom.as_view()),
+    path('fixations/create', CreateFixation.as_view()),
     path('fixations/<int:fixation_id>', GetFixation.as_view()),
     path('fixations/question', GetFixationQuestion.as_view()),
     path('fixations/answers/<int:question_id>', GetFixationAnswers.as_view()),

@@ -10,18 +10,18 @@ import httpClient from "../utils/httpClient";
 
 const relativePath = "api/fixations";
 
-export function createFixations(): Promise<Fixation> {
+export function createFixation(fixation: any): Promise<Fixation> {
   const requestOptions = {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      // votes_to_skip: votesToSkip,
-      // guest_can_pause: guestCanPause,
-    }),
+    "created_by": 1,
+    "fixation_title": "The beginning of something new",
+    "category": "Other",
+    "description": "Hello from a far. Local testing.",
+    "img_url": "https://cdn.cloudflare.steamstatic.com/steam/apps/348250/header.jpg",
+    "keep_shuffled": true
   };
   return new Promise((resolve, reject) => {
     httpClient.post(
-      "/api/create-game-instance",
+      `${relativePath}/create`,
       requestOptions
     )
       .then(response => {
@@ -79,9 +79,46 @@ export function getFixationQuestion(questionId: number): Promise<FixationQuestio
   });
 }
 
+export function addFixationQuestion(question: FixationQuestion): Promise<FixationQuestion> {
+  const body = {
+    'fixation': question.fixationId,
+    'question_idx': question.questionIdx,
+    'question_txt': question.questionTxt,
+    'multiple_choice_ind': question.multipleChoiceInd,
+    'img_url': question.imgUrl,
+    'video_playback_url': question.videoPlaybackUrl,
+    'created_by': question.createdBy,
+    'question_category': question.questionCategory
+  };
+
+  return new Promise((resolve, reject) => {
+    httpClient.post(
+      `${relativePath}/question`,
+      body
+    )
+      .then(response => {
+        resolve(response.data)
+      })
+      .catch(error => reject(error));
+  });
+}
+
 export function getFixationQuestionAnswers(questionId: number): Promise<FixationAnswer[]> {
   return new Promise((resolve, reject) => {
     httpClient.get(
+      `${relativePath}/answers/${questionId}`
+    )
+      .then(response => {
+        resolve(response.data)
+      })
+      .catch(error => reject(error));
+  });
+}
+
+export function setFixationQuestionAnswers(questionId: number): Promise<string> {
+  throw Error;
+  return new Promise((resolve, reject) => {
+    httpClient.post(
       `${relativePath}/answers/${questionId}`
     )
       .then(response => {

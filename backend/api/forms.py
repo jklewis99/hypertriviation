@@ -3,9 +3,18 @@ from django.forms import ModelForm
 
 from authentication.models import HypertriviationUser
 
-from .models import Fixation, FixationAnswer, User, FixationQuestion
+from .models import Fixation, FixationAnswer, FixationCategory, FixationQuestion
 
 class FixationForm(forms.Form):
+    created_by = forms.ModelChoiceField(HypertriviationUser.objects.all(), required=True)
+    fixation_title = forms.CharField(max_length=50, required=True)
+    category = forms.ChoiceField(choices=FixationCategory.choices, required=False)
+    description = forms.CharField(max_length=240, required=False)
+    img_url = forms.CharField(max_length=100, required=False) # change this
+    keep_shuffled = forms.BooleanField(required=False)
+    spotify_playlist_id = forms.CharField(max_length=12, required=False)
+    spotify_random_start_ind = forms.BooleanField(required=False)
+    default_duration = forms.IntegerField(required=False)
 
     class Meta:
         model = Fixation
@@ -27,9 +36,7 @@ class FixationForm(forms.Form):
         )
     
     def __init__(self, *args, **kwargs):
-        created_by_name = kwargs.pop('created_by_name', '')
         super(FixationForm, self).__init__(*args, **kwargs)
-        self.fields['created_by'] = forms.ModelChoiceField(queryset=User.objects.filter(username=created_by_name))
 
 class FixationQuestionForm(forms.Form):
 
@@ -57,9 +64,7 @@ class FixationQuestionForm(forms.Form):
         )
     
     def __init__(self, *args, **kwargs):
-        # fixation_id = kwargs.pop('fixation_id', '')
         super(FixationQuestionForm, self).__init__(*args, **kwargs)
-        # self.fields['fixation'] = forms.ModelChoiceField(queryset=Fixation.objects.filter(id=fixation_id))
 
 class FixationAnswerForm(forms.Form):
 
