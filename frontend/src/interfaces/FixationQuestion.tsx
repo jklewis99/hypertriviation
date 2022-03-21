@@ -1,6 +1,6 @@
 export interface FixationQuestion {
   id: number;
-  fixationId: string;
+  fixationId: number;
   questionIdx: number;
   questionTxt: string;
   multipleChoiceInd: boolean;

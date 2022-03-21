@@ -67,7 +67,7 @@ const FixationCreate = () => {
     console.log(fixationSettings);
     createFixation(newFixationValues)
       .then((fixation) => {
-        navigate(`/fixations/create/${fixation.id}`, { state: fixation });
+        navigate(`/fixations/create/${fixation.id}`, { state: [fixation.id , 1] }); // TODO: pass id in only one place
       })
       .catch((error: Error) => {
         console.log(error.message);

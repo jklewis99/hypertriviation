@@ -23,10 +23,12 @@ import { accessToken, refreshToken, spotifyAuthenticated } from '../../utils/con
 import { getUser } from '../../services/user.service';
 import FixationCreate from '../FixationCreate/FixationCreate';
 import FixationQuestionCreate from '../FixationQuestionCreate/FixationQuestionCreate';
+import { HypertriviationUser } from '../../interfaces/HypertriviationUser';
 
 const AppRouter = () => {
   const [isSpotifyAuthenticated, setIsSpotifyAuthenticated] = useState<boolean>(false);
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+  const [user, setUser] = useState<HypertriviationUser>();
   const webSocket = new WebSocket(webSocketConnectionString)
 
   const connectWebSocket = () => {
@@ -67,6 +69,7 @@ const AppRouter = () => {
       getUser()
       .then((user)=> {
         setIsLoggedIn(true);
+        setUser(user);
         setIsSpotifyAuthenticated(user.spotifyAuthenticatedInd);
         localStorage.setItem(spotifyAuthenticated, String(user.spotifyAuthenticatedInd));
       })
@@ -106,7 +109,7 @@ const AppRouter = () => {
           <Route path="/" element={<Welcome isLoggedIn={isLoggedIn}/>}>
           </Route>
           <Route path="/fixations/create" element={<FixationCreate />} />
-          <Route path="/fixations/create/:fixationId" element={<FixationQuestionCreate />} />
+          {user ? <Route path="/fixations/create/:fixationId" element={<FixationQuestionCreate userId={user.id}/>}/> : null }
           <Route path="/fixations/list" element={<FixationList />} />
           <Route path="/fixations/:roomName" element={<FixationView isSpotifyAuthenticated={isSpotifyAuthenticated} />} />
           <Route path="/fixations/session/:code" element={<FixationSessionHost webSocket={webSocket} isSpotifyAuthenticated={isSpotifyAuthenticated}/>} />
