@@ -4,7 +4,7 @@ from rest_framework import generics, status
 
 from api.db_helper import join_room
 from authentication.models import HypertriviationUser
-from .forms import FixationForm, FixationQuestionForm
+from .forms import FixationAnswerForm, FixationForm, FixationQuestionForm
 from .serializers import FixationAnswerSerializer, FixationQuestionSerializer, FixationSerializer, FixationSessionSerializer, FixationSessionSettingsSerializer, GetFixationSessionPlayersSerializer, RoomSerializer, CreateRoomSerializer, StartFixationSessionSerializer, UpdateRoomSerializer, UserSerializer
 from .models import Fixation, FixationAnswer, FixationCategory, FixationQuestion, FixationSession, FixationSessionPlayer, FixationSessionSettings, Room, User
 from rest_framework.views import APIView
@@ -223,6 +223,33 @@ class GetFixationAnswers(APIView):
             return Response({'Answers Not Found': 'Invalid id.'}, status=status.HTTP_404_NOT_FOUND)
 
         return Response({'Bad Request': 'Question Id paramater not found in request'}, status=status.HTTP_400_BAD_REQUEST)
+
+class AddFixationAnswers(APIView):
+    def post(self, request, format=None):
+        # request.data.get('title')
+        # print(request.body)
+        # print(request.body.getlist('answers'))
+        answers_json = json.loads(request.body)
+        batch = []
+        question_txt = ""
+        for item in answers_json["answers"]:
+            form = FixationAnswerForm(item)
+            if form.is_valid():
+                question_txt = form.cleaned_data.get("question")
+                fixation_answer = FixationAnswer(
+                    question = form.cleaned_data.get("question"),
+                    answer_txt = form.cleaned_data.get("answer_txt"),
+                    correct_answer_ind = form.cleaned_data.get("correct_answer_ind"),
+                    created_by = form.cleaned_data.get("created_by")
+                )
+                batch.append(fixation_answer)
+            else:
+                batch = []
+                break
+        if batch:
+            FixationAnswer.objects.bulk_create(batch)
+            return Response({f'Answers created for {question_txt}'}, status=status.HTTP_201_CREATED)
+        return Response({'Bad Request': form.errors}, status=status.HTTP_400_BAD_REQUEST)
 
 class StartFixationSession(APIView):
     serializer_class = StartFixationSessionSerializer

@@ -67,7 +67,11 @@ class FixationQuestionForm(forms.Form):
         super(FixationQuestionForm, self).__init__(*args, **kwargs)
 
 class FixationAnswerForm(forms.Form):
-
+    question = forms.ModelChoiceField(FixationQuestion.objects.all())
+    answer_txt = forms.CharField(max_length=512)
+    correct_answer_ind = forms.BooleanField(required=True)
+    created_by = forms.ModelChoiceField(HypertriviationUser.objects.all())
+    
     class Meta:
         model = FixationAnswer
         fields = (
@@ -80,6 +84,4 @@ class FixationAnswerForm(forms.Form):
         )
     
     def __init__(self, *args, **kwargs):
-        fixation_id = kwargs.pop('fixation_id', '')
         super(FixationAnswerForm, self).__init__(*args, **kwargs)
-        self.fields['fixation'] = forms.ModelChoiceField(queryset=Fixation.objects.filter(id=fixation_id))

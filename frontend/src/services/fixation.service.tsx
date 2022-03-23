@@ -5,6 +5,7 @@ import { FixationSession } from "../interfaces/FixationSession";
 import { FixationSessionPlayer } from "../interfaces/FixationSessionPlayer";
 import { FixationSessionSettings } from "../interfaces/FixationSessionSettings";
 import { FixationSessionUser } from "../interfaces/FixationSessionUser";
+import { FixationAnswerPayload } from "../interfaces/payloads/FixationAnswer.payload";
 import { SetFixationSessionSettings } from "../interfaces/payloads/SetFixationSessionSettings.payload";
 import httpClient from "../utils/httpClient";
 
@@ -107,6 +108,22 @@ export function getFixationQuestionAnswers(questionId: number): Promise<Fixation
   return new Promise((resolve, reject) => {
     httpClient.get(
       `${relativePath}/answers/${questionId}`
+    )
+      .then(response => {
+        resolve(response.data)
+      })
+      .catch(error => reject(error));
+  });
+}
+
+export function addFixationQuestionAnswer(answers: FixationAnswerPayload[]): Promise<string> {
+  const requestBody = {
+    "answers": answers
+  }
+  return new Promise((resolve, reject) => {
+    httpClient.post(
+      `${relativePath}/answers`,
+      requestBody
     )
       .then(response => {
         resolve(response.data)
