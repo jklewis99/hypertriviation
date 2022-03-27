@@ -4,13 +4,23 @@ import { useLocation } from 'react-router-dom';
 import { Button, Card, CardActions, CardContent, CardHeader, Divider, FormControl, FormControlLabel, FormGroup, Grid, IconButton, Input, InputLabel, Snackbar, SnackbarContent, Switch, TextField, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
 import { AddCircleOutline, Close, DeleteOutlineRounded, Error } from '@mui/icons-material';
 import { FixationQuestion } from '../../interfaces/FixationQuestion';
-import { addFixationQuestion } from '../../services/fixation.service';
+import { addFixationQuestion, addFixationQuestionAnswer } from '../../services/fixation.service';
+import { FixationAnswer } from '../../interfaces/FixationAnswer';
+import { FixationAnswerPayload } from '../../interfaces/payloads/FixationAnswer.payload';
 interface FixationQuestionCreateProps {
   userId: number;
 }
 
 const FixationQuestionCreate: FC<FixationQuestionCreateProps> = (props) => {
   const [fixationId, questionIdx]: [number, number] = useLocation().state;
+  // TODO: Should this just become a class as opposed to interface?
+  const emptyAnswer: FixationAnswer = {
+    id: 0,                // initialize to 0, as this will be updated ignored in the post request
+    questionId: 0,        // initialize to 0, as this will be updated after question is created
+    answerTxt: "",
+    correctAnswerInd: true,
+    createdBy: props.userId
+  };
   const [currentQuestion, setCurrentQuestion] = useState<FixationQuestion>({
     id: 0,                    // initialize to 0, as this will be updated ignored in the post request
     fixationId: fixationId,
@@ -22,14 +32,21 @@ const FixationQuestionCreate: FC<FixationQuestionCreateProps> = (props) => {
     createdBy: props.userId,
     questionCategory: '',     // TODO
   });
+  
 
-  const [correctAnswers, setCorrectAnswers] = useState<any[]>([
-    {answerText: ""}
+  const [correctAnswers, setCorrectAnswers] = useState<FixationAnswer[]>([
+    {
+      ...emptyAnswer
+    }
   ]);
 
-  const [wrongAnswers, setWrongAnswers] = useState<any[]>([
-    {answerText: ""}
+  const [wrongAnswers, setWrongAnswers] = useState<FixationAnswer[]>([
+    {
+      ...emptyAnswer,
+      correctAnswerInd: false
+    }
   ]);
+
   const [errorMessage, setErrorMessage] = useState<string>("");
   const [showErrorMessage, setShowErrorMessage] = useState<boolean>(true);
 
@@ -44,7 +61,7 @@ const FixationQuestionCreate: FC<FixationQuestionCreateProps> = (props) => {
 
   const writeAnswerTxt = (idx: number, answerTxt: string, isCorrect: boolean = false) => {
     let answers = isCorrect ? correctAnswers : wrongAnswers;
-    answers[idx].answerText = answerTxt;
+    answers[idx].answerTxt = answerTxt;
     if (isCorrect) {
       setCorrectAnswers([...answers]);
       return;
@@ -55,10 +72,19 @@ const FixationQuestionCreate: FC<FixationQuestionCreateProps> = (props) => {
 
   const addMultipleChoiceAnswer = (isCorrect: boolean = false) => {
     if (isCorrect) {
-      setCorrectAnswers([...correctAnswers, {answerText: ""}]);
-      return
+      setCorrectAnswers([...correctAnswers, {...emptyAnswer, answerTxt: ""}]);
+      return;
     }
-    setWrongAnswers([...wrongAnswers, {answerText: ""}]);
+    setWrongAnswers(
+      [
+        ...wrongAnswers,
+        {
+          ...emptyAnswer,
+          answerTxt: "", 
+          correctAnswerInd: false
+        }
+      ]
+    );
   }
 
   const removeMultipleChoiceAnswer = (idx: number, isCorrect: boolean = false) => {
@@ -72,6 +98,29 @@ const FixationQuestionCreate: FC<FixationQuestionCreateProps> = (props) => {
     setWrongAnswers(answers.filter((_, i) => i != idx));
   }
 
+  const createAnswerPayload = (questionId: number) => {
+    let answersPayload: FixationAnswerPayload[] = [];
+    correctAnswers.forEach(answer => {
+      answersPayload.push({
+        question: questionId,
+        answer_txt: answer.answerTxt,
+        correct_answer_ind: answer.correctAnswerInd,
+        created_by: answer.createdBy
+      })
+    });
+    if (currentQuestion.multipleChoiceInd) {
+      wrongAnswers.forEach(answer => {
+        answersPayload.push({
+          question: questionId,
+          answer_txt: answer.answerTxt,
+          correct_answer_ind: answer.correctAnswerInd,
+          created_by: answer.createdBy
+        })
+      });
+    }
+    return answersPayload;
+  }
+
   const isValid = () => {
     let tempErrorMessage = "The following field(s) cannot be empty: ";
     let isAnyError = false;
@@ -80,12 +129,12 @@ const FixationQuestionCreate: FC<FixationQuestionCreateProps> = (props) => {
       isAnyError = true;
     }
     
-    if (!correctAnswers.length || correctAnswers.some(answer => answer.answerText === "")) {
+    if (!correctAnswers.length || correctAnswers.some(answer => answer.answerTxt === "")) {
       tempErrorMessage += "Correct Answer(s), ";
       isAnyError = true;
     }
 
-    if (currentQuestion.multipleChoiceInd && (!wrongAnswers.length || wrongAnswers.some(answer => answer.answerText === ""))) {
+    if (currentQuestion.multipleChoiceInd && (!wrongAnswers.length || wrongAnswers.some(answer => answer.answerTxt === ""))) {
       tempErrorMessage += "Wrong Answer(s), ";
       isAnyError = true;
     }
@@ -104,10 +153,13 @@ const FixationQuestionCreate: FC<FixationQuestionCreateProps> = (props) => {
   const submitQuestion = () => {
     if (!isValid()) return;
 
+    // TODO: make both question and answer post requests a single ACID transaction
     addFixationQuestion(currentQuestion)
       .then(
-        (success) => {
-          console.log(success);
+        (fixationQuestion) => {
+          console.log(fixationQuestion);
+          let answers = createAnswerPayload(fixationQuestion.id);
+          addFixationQuestionAnswer(answers);
           clearQuestion();
         }
       )
@@ -122,10 +174,17 @@ const FixationQuestionCreate: FC<FixationQuestionCreateProps> = (props) => {
 
   const clearQuestion = () => {
     setCorrectAnswers([
-      {answerText: ""}
+      {
+        ...emptyAnswer,
+        answerTxt: ""
+      }
     ]);
     setWrongAnswers([
-      {answerText: ""}
+      {
+        ...emptyAnswer,
+        answerTxt: "",
+        correctAnswerInd: false
+      }
     ]);
     setCurrentQuestion({
       ...currentQuestion,
@@ -134,6 +193,7 @@ const FixationQuestionCreate: FC<FixationQuestionCreateProps> = (props) => {
       imgUrl: "",
       videoPlaybackUrl: "",
     });
+    console.log(correctAnswers, wrongAnswers, currentQuestion);
   }
 
   return (
@@ -189,12 +249,12 @@ const FixationQuestionCreate: FC<FixationQuestionCreateProps> = (props) => {
           {
             <>
             {
-              correctAnswers.map((correctAnswer: any, i: number) => (
+              correctAnswers.map((correctAnswer: FixationAnswer, i: number) => (
                 <div key={`correct-${i}`}>
                   <InputLabel>Correct Answer {correctAnswers.length > 1 ? i + 1 : ""}</InputLabel>
                   <FormControl required fullWidth margin="normal">
                     <TextField
-                      value={correctAnswer.answerText}
+                      value={correctAnswer.answerTxt}
                       name={`wrongAnswer${i}`}
                       label={"Correct Answer " + (correctAnswers.length > 1 ? i + 1 : "")}
                       className={styles.inputs}
@@ -214,12 +274,12 @@ const FixationQuestionCreate: FC<FixationQuestionCreateProps> = (props) => {
             ?
             <>
               {
-              wrongAnswers.map((wrongAnswer: any, i: number) => (
+              wrongAnswers.map((wrongAnswer: FixationAnswer, i: number) => (
                 <>
                   <InputLabel>Wrong Answer {i + 1}</InputLabel>
                   <FormControl required fullWidth margin="normal">
                     <TextField
-                      value={wrongAnswer.answerText}
+                      value={wrongAnswer.answerTxt}
                       name={`wrongAnswer${i}`}
                       label={`Wrong Answer ${i + 1}`}
                       className={styles.inputs}

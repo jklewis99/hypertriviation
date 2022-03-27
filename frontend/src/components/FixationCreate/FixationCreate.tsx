@@ -1,5 +1,5 @@
 import { Button, Card, CardActions, CardContent, CardHeader, Divider, FormControl, FormControlLabel, FormGroup, Input, InputLabel, Switch, TextField, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
-import React, { useState } from 'react';
+import React, { FC, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PlaylistsResponse } from '../../interfaces/payloads/Playlists.payload';
 import { SetFixationSessionSettings } from '../../interfaces/payloads/SetFixationSessionSettings.payload';
@@ -8,14 +8,19 @@ import { getPlaylists } from '../../services/spotify.service';
 import FixationSettings from '../FixationSettings/FixationSettings';
 import styles from './FixationCreate.module.scss';
 
-const FixationCreate = () => {
+interface FixationCreateProps {
+  userId: number;
+}
+
+const FixationCreate: FC<FixationCreateProps> = (props) => {
   const navigate = useNavigate();
   const [fixationCategory, setFixationCategory] = useState<string>();
   const [newFixationValues, setNewFixationValues] = useState({
     title: "",
     description: "",
     imgUrl: "",
-    spotifyPlaylist: null
+    spotifyPlaylist: null,
+    createdBy: props.userId
   });
 
   // TODO: Do not hard code these values...

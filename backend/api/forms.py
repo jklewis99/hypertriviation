@@ -69,7 +69,7 @@ class FixationQuestionForm(forms.Form):
 class FixationAnswerForm(forms.Form):
     question = forms.ModelChoiceField(FixationQuestion.objects.all())
     answer_txt = forms.CharField(max_length=512)
-    correct_answer_ind = forms.BooleanField(required=True)
+    correct_answer_ind = forms.BooleanField(required=False)
     created_by = forms.ModelChoiceField(HypertriviationUser.objects.all())
     
     class Meta:

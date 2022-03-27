@@ -108,7 +108,7 @@ const AppRouter = () => {
         <Routes>
           <Route path="/" element={<Welcome isLoggedIn={isLoggedIn}/>}>
           </Route>
-          <Route path="/fixations/create" element={<FixationCreate />} />
+          {user ? <Route path="/fixations/create" element={<FixationCreate userId={user.id}/>} /> : null }
           {user ? <Route path="/fixations/create/:fixationId" element={<FixationQuestionCreate userId={user.id}/>}/> : null }
           <Route path="/fixations/list" element={<FixationList />} />
           <Route path="/fixations/:roomName" element={<FixationView isSpotifyAuthenticated={isSpotifyAuthenticated} />} />

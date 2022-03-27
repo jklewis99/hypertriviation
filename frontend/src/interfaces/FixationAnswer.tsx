@@ -1,9 +1,7 @@
 export interface FixationAnswer {
   id: number;
-  questionId: string;
+  questionId: number;
   answerTxt: string;
   correctAnswerInd: boolean;
   createdBy: number;
-  createdAt: string;
-  updatedAt: string;
 }

@@ -13,11 +13,11 @@ const relativePath = "api/fixations";
 
 export function createFixation(fixation: any): Promise<Fixation> {
   const requestOptions = {
-    "created_by": 1,
-    "fixation_title": "The beginning of something new",
+    "created_by": fixation.createdBy,
+    "fixation_title": fixation.title,
     "category": "Other",
-    "description": "Hello from a far. Local testing.",
-    "img_url": "https://cdn.cloudflare.steamstatic.com/steam/apps/348250/header.jpg",
+    "description": fixation.description,
+    "img_url": fixation.imgUrl,
     "keep_shuffled": true
   };
   return new Promise((resolve, reject) => {

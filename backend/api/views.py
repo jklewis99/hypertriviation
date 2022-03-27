@@ -180,7 +180,7 @@ class GetFixation(APIView):
 
         return Response({'Bad Request': 'Id paramater not found in request'}, status=status.HTTP_400_BAD_REQUEST)
 
-class GetFixationQuestion(APIView):
+class FixationQuestionView(APIView):
     serializer_class = FixationQuestionSerializer
     def get(self, request, format=None, *args, **kwargs):
         if request.question_id != None:
@@ -208,7 +208,8 @@ class GetFixationQuestion(APIView):
                 question_category=form.cleaned_data.get("question_category")
             ) # TODO: pass settings
             fixation_question.save()
-            return Response({f'Question created for {form.cleaned_data.get("fixation")}'}, status=status.HTTP_201_CREATED)
+            data = FixationQuestionSerializer(fixation_question).data;
+            return Response(data, status=status.HTTP_201_CREATED)
         
         return Response({'Bad Request': form.errors}, status=status.HTTP_400_BAD_REQUEST)
 
