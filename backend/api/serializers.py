@@ -49,7 +49,7 @@ class FixationSerializer(serializers.ModelSerializer):
         )
 
 class FixationQuestionSerializer(serializers.ModelSerializer):
-    fixation_id = serializers.CharField(source='fixation.id')
+    fixation_id = serializers.IntegerField(source='fixation.id')
     class Meta:
         model = FixationQuestion
         fields = (
@@ -67,7 +67,7 @@ class FixationQuestionSerializer(serializers.ModelSerializer):
         )
 
 class FixationAnswerSerializer(serializers.ModelSerializer):
-    question_id = serializers.CharField(source='question.id')
+    question_id = serializers.IntegerField(source='question.id')
     class Meta:
         model = FixationAnswer
         fields = (

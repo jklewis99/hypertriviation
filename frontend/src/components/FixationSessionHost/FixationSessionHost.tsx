@@ -4,12 +4,13 @@ import { useLocation } from 'react-router-dom';
 import { FixationSession } from '../../interfaces/FixationSession';
 import FixationSessionStart from '../FixationSessionStart/FixationSessionStart';
 import { FixationSessionHostProps } from '../../interfaces/props/FixationSessionHost.props';
-import { getFixation, getFixationPlayers, getFixationQuestion, getFixationQuestionAnswers } from '../../services/fixation.service';
+import { getFixation, getFixationPlayers, getFixationQuestion, getFixationQuestionAnswers, getFixationQuestionsAndAnswers } from '../../services/fixation.service';
 import { FixationSessionPlayer } from '../../interfaces/FixationSessionPlayer';
 import { JoinRoomReceivedEventPayload, SocketEventReceived } from '../../interfaces/websockets/SocketEvents';
 import { Card, CardContent, Grid, Typography } from '@mui/material';
 import FixationSessionInstructions from '../FixationSessionInstructions/FixationSessionInstructions';
 import MusicPlayer from '../MusicPlayer/MusicPlayer';
+import { Fixation } from '../../interfaces/Fixation';
 
 const FixationSessionHost = (props: FixationSessionHostProps) => {
   const [errorMessage, setErrorMessage] = useState<string>("");
@@ -20,6 +21,8 @@ const FixationSessionHost = (props: FixationSessionHostProps) => {
   const webSocket = useRef<WebSocket>(props.webSocket);
   const [joinedUsers, setJoinedUsers] = useState<FixationSessionPlayer[]>([]);
   const [playlistId, setPlaylistId] = useState<string>();
+  const [currentFixation, setCurrentFixation] = useState<Fixation>();
+  const [pageNumber, setPageNumber] = useState<number>(1);
 
   const handleAllUsersJoined = () => {
     setIsWaitingToStart(false);
@@ -42,6 +45,7 @@ const FixationSessionHost = (props: FixationSessionHostProps) => {
     getFixation(fixationSession.fixationId)
       .then((response) => {
         console.log(response);
+        setCurrentFixation(response);
         setPlaylistId(response.spotifyPlaylistId);
       })
       .catch((error: Error) => setErrorMessage(error.message));
@@ -57,12 +61,13 @@ const FixationSessionHost = (props: FixationSessionHostProps) => {
         console.log(response);
       })
       .catch((error: Error) => console.log(error));
-  }, [])
+  }, []);
+
   useEffect(() => {
     webSocket.current.onmessage = (event) => {
       handleUserJoined(JSON.parse(event.data))
     }
-  })
+  });
 
   const handleUserJoined = (socketMessage: SocketEventReceived) => {
     console.log(socketMessage.data)
@@ -80,6 +85,16 @@ const FixationSessionHost = (props: FixationSessionHostProps) => {
     else {
       setErrorMessage(socketMessage.message)
     }
+  }
+
+  const getQuestionAndAnswers = (fixationId: number, pageNumber: number) => {
+    getFixationQuestionsAndAnswers(fixationId, pageNumber)
+      .then((response) => {
+        console.log(response);
+      })
+      .catch((error: Error) => {
+        console.log(error.message);
+      });
   }
 
   if (isWaitingToStart) {
@@ -158,6 +173,10 @@ const FixationSessionHost = (props: FixationSessionHostProps) => {
         <MusicPlayer spotifyUri={`spotify:playlist:${playlistId}`}/>
       </div>
     );
+  }
+  if (currentFixation && !currentFixation.spotifyPlaylistId) {
+    // show the thing
+    getQuestionAndAnswers(currentFixation.id, pageNumber);
   }
   return (
     <div className={styles.FixationSessionHost} data-testid="FixationSessionHost">
