@@ -11,6 +11,9 @@ import { Card, CardContent, Grid, Typography } from '@mui/material';
 import FixationSessionInstructions from '../FixationSessionInstructions/FixationSessionInstructions';
 import MusicPlayer from '../MusicPlayer/MusicPlayer';
 import { Fixation } from '../../interfaces/Fixation';
+import FixationSessionQuestion from '../FixationSessionQuestion/FixationSessionQuestion';
+import { FixationQuestion } from '../../interfaces/FixationQuestion';
+import { FixationAnswer } from '../../interfaces/FixationAnswer';
 
 const FixationSessionHost = (props: FixationSessionHostProps) => {
   const [errorMessage, setErrorMessage] = useState<string>("");
@@ -22,7 +25,12 @@ const FixationSessionHost = (props: FixationSessionHostProps) => {
   const [joinedUsers, setJoinedUsers] = useState<FixationSessionPlayer[]>([]);
   const [playlistId, setPlaylistId] = useState<string>();
   const [currentFixation, setCurrentFixation] = useState<Fixation>();
+  const [currentFixationQuestions, setCurrentFixationQuestions] = useState<FixationQuestion[]>();
+  const [currentFixationAnswers, setCurrentFixationAnswers] = useState<FixationAnswer[]>();
   const [pageNumber, setPageNumber] = useState<number>(1);
+  const [totalNumberOfPages, setTotalNumberOfPages] = useState<number>(1);
+  const [currentPaginatedQuestionIdx, setCurrentPaginatedQuestionIdx] = useState<number>(0);
+  const [isEndOfFixation, setIsEndOfFixation] = useState<boolean>(false);
 
   const handleAllUsersJoined = () => {
     setIsWaitingToStart(false);
@@ -47,20 +55,9 @@ const FixationSessionHost = (props: FixationSessionHostProps) => {
         console.log(response);
         setCurrentFixation(response);
         setPlaylistId(response.spotifyPlaylistId);
+        getQuestionAndAnswers(response.id, pageNumber);
       })
       .catch((error: Error) => setErrorMessage(error.message));
-
-    getFixationQuestion(1)
-      .then((response) => {
-        console.log(response);
-      })
-      .catch((error: Error) => console.log(error));
-
-    getFixationQuestionAnswers(1)
-      .then((response) => {
-        console.log(response);
-      })
-      .catch((error: Error) => console.log(error));
   }, []);
 
   useEffect(() => {
@@ -90,11 +87,32 @@ const FixationSessionHost = (props: FixationSessionHostProps) => {
   const getQuestionAndAnswers = (fixationId: number, pageNumber: number) => {
     getFixationQuestionsAndAnswers(fixationId, pageNumber)
       .then((response) => {
+        setCurrentFixationQuestions(response.questions);
+        setCurrentFixationAnswers(response.answers);
+        setTotalNumberOfPages(response.totalPages);
         console.log(response);
       })
       .catch((error: Error) => {
         console.log(error.message);
       });
+  }
+
+  const getCurrentQuestionAnswers = (questionId: number) => {
+    return currentFixationAnswers?.filter((answer: FixationAnswer) => answer.questionId === questionId) || [];
+  }
+
+  const incrementCurrentPaginatedQuestionIdx = () => {
+    if (currentFixationQuestions && currentFixation && currentPaginatedQuestionIdx === currentFixationQuestions.length - 1) {
+      if (totalNumberOfPages === pageNumber) {
+        setIsEndOfFixation(true);
+        return;
+      }
+      getQuestionAndAnswers(currentFixation.id, pageNumber + 1);
+      setPageNumber(pageNumber + 1);
+      setCurrentPaginatedQuestionIdx(0);
+      return;
+    }
+    setCurrentPaginatedQuestionIdx(currentPaginatedQuestionIdx + 1);
   }
 
   if (isWaitingToStart) {
@@ -166,6 +184,18 @@ const FixationSessionHost = (props: FixationSessionHostProps) => {
       </div>
     );
   }
+  
+  if (isEndOfFixation) {
+    return (
+      <div className={styles.FixationSessionHost} data-testid="FixationSessionHost">
+        This is the end of the session.
+
+        TODO: Show standings.
+        TODO: Get stats.
+      </div>
+    )
+  }
+
   if (playlistId != "") {
     return (
       <div className={styles.FixationSessionHost} data-testid="FixationSessionHost">
@@ -174,9 +204,19 @@ const FixationSessionHost = (props: FixationSessionHostProps) => {
       </div>
     );
   }
-  if (currentFixation && !currentFixation.spotifyPlaylistId) {
+
+  if (currentFixation && !currentFixation.spotifyPlaylistId && currentFixationQuestions && currentFixationAnswers) {
     // show the thing
-    getQuestionAndAnswers(currentFixation.id, pageNumber);
+    let currentAnswers = getCurrentQuestionAnswers(currentFixationQuestions[currentPaginatedQuestionIdx].id);
+    return (
+      <div className={styles.FixationSessionHost} data-testid="FixationSessionHost">
+        <FixationSessionQuestion
+          question={currentFixationQuestions[currentPaginatedQuestionIdx]}
+          answers={currentAnswers}
+          goToNextQuestionCallback={incrementCurrentPaginatedQuestionIdx}
+        />
+      </div>
+    )
   }
   return (
     <div className={styles.FixationSessionHost} data-testid="FixationSessionHost">

@@ -107,7 +107,7 @@ class GetFixationQuestionsAndAnswers(APIView):
                     answers_list.extend(FixationAnswerSerializer(FixationAnswer.objects.filter(question=FixationQuestion(question['id'])), many=True).data)
                 # fixation_question = FixationQuestion.objects.filter(fixation=fixation_session[0])
                 # data = FixationQuestionSerializer(fixation_question[0]).data
-                return Response({"questions": question_list, "answers": answers_list}, status=status.HTTP_200_OK)
+                return Response({"questions": question_list, "answers": answers_list, "total_pages": paginator.num_pages}, status=status.HTTP_200_OK)
             return Response({'Fixation Not Found': 'Invalid fixation_id.'}, status=status.HTTP_404_NOT_FOUND)
 
         return Response({'Bad Request': 'Missing parameters in request'}, status=status.HTTP_400_BAD_REQUEST)
