@@ -98,16 +98,22 @@ class GetFixationQuestionsAndAnswers(APIView):
         if fixation_id and page_number:
             fixation_session = Fixation.objects.filter(id=fixation_id)
             if fixation_session.exists():
-                question_list = FixationQuestion.objects.filter(fixation=fixation_session[0])
-                paginator = Paginator(question_list, 10) # return only 10 contacts
-                page_obj = paginator.get_page(page_number)
-                question_list = [FixationQuestionSerializer(page_question).data for page_question in page_obj]
+                question_list = FixationQuestionSerializer(FixationQuestion.objects.filter(fixation=fixation_session[0]), many=True).data
+                # paginator = Paginator(question_list, 10) # return only 10 contacts
+                # page_obj = paginator.get_page(page_number)
+                # question_list = [FixationQuestionSerializer(page_question).data for page_question in page_obj]
                 answers_list = []
+                question_and_answers_list = []
                 for question in question_list:
-                    answers_list.extend(FixationAnswerSerializer(FixationAnswer.objects.filter(question=FixationQuestion(question['id'])), many=True).data)
+                    answers = FixationAnswerSerializer(FixationAnswer.objects.filter(question=FixationQuestion(question['id'])), many=True).data
+                    question_and_answers_list.append({
+                        "question": question,
+                        "answers": answers
+                    })
+                    # answers_list.extend(FixationAnswerSerializer(FixationAnswer.objects.filter(question=FixationQuestion(question['id'])), many=True).data)
                 # fixation_question = FixationQuestion.objects.filter(fixation=fixation_session[0])
                 # data = FixationQuestionSerializer(fixation_question[0]).data
-                return Response({"questions": question_list, "answers": answers_list, "total_pages": paginator.num_pages}, status=status.HTTP_200_OK)
+                return Response(question_and_answers_list, status=status.HTTP_200_OK)
             return Response({'Fixation Not Found': 'Invalid fixation_id.'}, status=status.HTTP_404_NOT_FOUND)
 
         return Response({'Bad Request': 'Missing parameters in request'}, status=status.HTTP_400_BAD_REQUEST)

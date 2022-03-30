@@ -1,0 +1,19 @@
+.FixationSessionAnswer {
+    width: 100%;
+    // margin: 10px;
+    padding: 20px 0px;
+
+    .answerCard {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .wrongAnswerCard {
+        background-color: #333;
+        color: black;
+    }
+    .correctAnswerCard {
+        border: solid 2px white;
+    }
+    
+}

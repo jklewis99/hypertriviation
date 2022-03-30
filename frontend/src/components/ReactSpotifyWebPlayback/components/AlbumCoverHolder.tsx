@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useInterval } from '../../../hooks/useInterval';
-import { randomUniqueNumberList } from '../../../utils/numbers';
+import { randomUniqueNumberList } from '../../../utils/randomFunctions';
 import styles from '../ReactSpotifyWebPlayback.module.scss';
 
 interface Props {

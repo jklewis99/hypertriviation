@@ -1,6 +1,6 @@
 import React, { FC, useState } from 'react';
 import styles from './FixationQuestionCreate.module.scss';
-import { useLocation } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { Button, Card, CardActions, CardContent, CardHeader, Divider, FormControl, FormControlLabel, FormGroup, Grid, IconButton, Input, InputLabel, Snackbar, SnackbarContent, Switch, TextField, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
 import { AddCircleOutline, Close, DeleteOutlineRounded, Error } from '@mui/icons-material';
 import { FixationQuestion } from '../../interfaces/FixationQuestion';
@@ -332,7 +332,7 @@ const FixationQuestionCreate: FC<FixationQuestionCreateProps> = (props) => {
           </Snackbar>
         ) : null}
         <CardActions className="card-actions">
-          <Button size="medium" variant="contained" color="secondary" onClick={() => {}} style={{ margin: "10px 20px" }}>Finish</Button>
+          <Button size="medium" variant="contained" color="secondary" to="/" component={Link} style={{ margin: "10px 20px" }}>Finish</Button>
           <Button size="medium" variant="contained" color="primary" onClick={submitQuestion} style={{ margin: "0 20px" }}>Next</Button>
         </CardActions>
       </Card>

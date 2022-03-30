@@ -1,7 +1,7 @@
 import { Fixation } from "../interfaces/Fixation";
 import { FixationAnswer } from "../interfaces/FixationAnswer";
 import { FixationQuestion } from "../interfaces/FixationQuestion";
-import { FixationQuestionsAndAnswers } from "../interfaces/FixationQuestionsAndAnswers";
+import { FixationQuestionAndAnswers } from "../interfaces/FixationQuestionsAndAnswers";
 import { FixationSession } from "../interfaces/FixationSession";
 import { FixationSessionPlayer } from "../interfaces/FixationSessionPlayer";
 import { FixationSessionSettings } from "../interfaces/FixationSessionSettings";
@@ -117,7 +117,7 @@ export function getFixationQuestionAnswers(questionId: number): Promise<Fixation
   });
 }
 
-export function getFixationQuestionsAndAnswers(fixationId: number, pageNumber: number): Promise<FixationQuestionsAndAnswers> {
+export function getFixationQuestionsAndAnswers(fixationId: number, pageNumber: number): Promise<FixationQuestionAndAnswers[]> {
   return new Promise((resolve, reject) => {
     httpClient.get(
       `${relativePath}/questions-and-answers?fixation_id=${fixationId}&page=${pageNumber}`

@@ -6,6 +6,7 @@ import styles from './FixationSessionQuestion.module.scss';
 
 interface FixationSessionQuestionProps {
   question: FixationQuestion;
+  questionIdx: number;
   answers: FixationAnswer[];
   goToNextQuestionCallback: () => void;
 }
@@ -13,13 +14,14 @@ interface FixationSessionQuestionProps {
 const FixationSessionQuestion: FC<FixationSessionQuestionProps> = (props) => {
   const fixationQuestion = props.question;
   const fixationQuestionAnswers = props.answers;
+  const questionIdx = props.questionIdx;
 
   return (
     <div className={styles.FixationSessionQuestion} data-testid="FixationSessionQuestion">
       <Card>
         <CardContent>
           <Typography>
-            Question #{fixationQuestion.questionIdx}
+            Question #{questionIdx}
           </Typography>
           <Typography>
             {fixationQuestion.questionTxt}
@@ -30,17 +32,6 @@ const FixationSessionQuestion: FC<FixationSessionQuestionProps> = (props) => {
         </CardContent>
 
         <CardContent>
-          <Typography>
-            Answers
-          </Typography>
-          {
-            fixationQuestionAnswers.map((fixation: FixationAnswer) => (
-              <Typography>
-                {fixation.answerTxt}
-                {fixation.correctAnswerInd ? "correct" : "incorrect"}
-              </Typography>
-            ))
-          }
           {/* img_url */}
           {/* video_url */}
           {/* spotify_url? */}

@@ -14,22 +14,28 @@ import { Fixation } from '../../interfaces/Fixation';
 import FixationSessionQuestion from '../FixationSessionQuestion/FixationSessionQuestion';
 import { FixationQuestion } from '../../interfaces/FixationQuestion';
 import { FixationAnswer } from '../../interfaces/FixationAnswer';
+import { FixationSessionSettings } from '../../interfaces/FixationSessionSettings';
+import { knuthShuffle } from '../../utils/randomFunctions';
+import { FixationQuestionAndAnswers } from '../../interfaces/FixationQuestionsAndAnswers';
+import CountdownTimer from '../CountdownTimer/CountdownTimer';
+import FixationSessionAnswer from '../FixationSessionAnswer/FixationSessionAnswer';
 
 const FixationSessionHost = (props: FixationSessionHostProps) => {
   const [errorMessage, setErrorMessage] = useState<string>("");
   const [isWaitingToStart, setIsWaitingToStart] = useState<boolean>(true);
   const [doShowInstructions, setDoShowInstructions] = useState<boolean>(false);
   const [isSessionLive, setIsSessionLive] = useState<boolean>(false);
-  const fixationSession: FixationSession = useLocation().state;
+  const fixationSession: FixationSession = useLocation().state.session;
+  const fixationSessionSettings: FixationSessionSettings = useLocation().state.sessionSettings;
   const webSocket = useRef<WebSocket>(props.webSocket);
   const [joinedUsers, setJoinedUsers] = useState<FixationSessionPlayer[]>([]);
   const [playlistId, setPlaylistId] = useState<string>();
   const [currentFixation, setCurrentFixation] = useState<Fixation>();
   const [currentFixationQuestions, setCurrentFixationQuestions] = useState<FixationQuestion[]>();
+  const [currentFixationQuestionsAndAnswers, setCurrentFixationQuestionsAndAnswers] = useState<FixationQuestionAndAnswers[]>();
   const [currentFixationAnswers, setCurrentFixationAnswers] = useState<FixationAnswer[]>();
-  const [pageNumber, setPageNumber] = useState<number>(1);
-  const [totalNumberOfPages, setTotalNumberOfPages] = useState<number>(1);
-  const [currentPaginatedQuestionIdx, setCurrentPaginatedQuestionIdx] = useState<number>(0);
+  const [currentQuestionIdx, setCurrentQuestionIdx] = useState<number>(0);
+  const [showAnswers, setShowAnswers] = useState<boolean>(false);
   const [isEndOfFixation, setIsEndOfFixation] = useState<boolean>(false);
 
   const handleAllUsersJoined = () => {
@@ -46,7 +52,7 @@ const FixationSessionHost = (props: FixationSessionHostProps) => {
     getFixationPlayers(fixationSession.code)
       .then((users) => {
         console.log(users);
-        setPlaylistId("")
+        setJoinedUsers([...joinedUsers, ...users])
       })
       .catch((error: Error) => setErrorMessage(error.message));
       
@@ -55,7 +61,7 @@ const FixationSessionHost = (props: FixationSessionHostProps) => {
         console.log(response);
         setCurrentFixation(response);
         setPlaylistId(response.spotifyPlaylistId);
-        getQuestionAndAnswers(response.id, pageNumber);
+        getQuestionAndAnswers(response.id, 0);
       })
       .catch((error: Error) => setErrorMessage(error.message));
   }, []);
@@ -87,9 +93,7 @@ const FixationSessionHost = (props: FixationSessionHostProps) => {
   const getQuestionAndAnswers = (fixationId: number, pageNumber: number) => {
     getFixationQuestionsAndAnswers(fixationId, pageNumber)
       .then((response) => {
-        setCurrentFixationQuestions(response.questions);
-        setCurrentFixationAnswers(response.answers);
-        setTotalNumberOfPages(response.totalPages);
+        setCurrentFixationQuestionsAndAnswers(fixationSessionSettings.randomShuffleInd ? knuthShuffle(response) : response);
         console.log(response);
       })
       .catch((error: Error) => {
@@ -101,18 +105,25 @@ const FixationSessionHost = (props: FixationSessionHostProps) => {
     return currentFixationAnswers?.filter((answer: FixationAnswer) => answer.questionId === questionId) || [];
   }
 
-  const incrementCurrentPaginatedQuestionIdx = () => {
-    if (currentFixationQuestions && currentFixation && currentPaginatedQuestionIdx === currentFixationQuestions.length - 1) {
-      if (totalNumberOfPages === pageNumber) {
-        setIsEndOfFixation(true);
-        return;
-      }
-      getQuestionAndAnswers(currentFixation.id, pageNumber + 1);
-      setPageNumber(pageNumber + 1);
-      setCurrentPaginatedQuestionIdx(0);
+  const incrementCurrentQuestionIdx = () => {
+    if (currentFixationQuestionsAndAnswers && currentQuestionIdx === currentFixationQuestionsAndAnswers.length - 1) {
+      setIsEndOfFixation(true);
       return;
     }
-    setCurrentPaginatedQuestionIdx(currentPaginatedQuestionIdx + 1);
+    revealAnswer(false);
+    setCurrentQuestionIdx(currentQuestionIdx + 1);
+  }
+
+  const terminateQuestion = (answerSubmitted: boolean = false) => {
+    if (answerSubmitted) {
+      // TODO handle some logic when socket stuff happens
+      return;
+    }
+    revealAnswer(true);
+  }
+
+  const revealAnswer = (doShow: boolean) => {
+    setShowAnswers(doShow);
   }
 
   if (isWaitingToStart) {
@@ -186,6 +197,7 @@ const FixationSessionHost = (props: FixationSessionHostProps) => {
   }
   
   if (isEndOfFixation) {
+    // TODO: mark FixationSession as deleted
     return (
       <div className={styles.FixationSessionHost} data-testid="FixationSessionHost">
         This is the end of the session.
@@ -205,15 +217,20 @@ const FixationSessionHost = (props: FixationSessionHostProps) => {
     );
   }
 
-  if (currentFixation && !currentFixation.spotifyPlaylistId && currentFixationQuestions && currentFixationAnswers) {
-    // show the thing
-    let currentAnswers = getCurrentQuestionAnswers(currentFixationQuestions[currentPaginatedQuestionIdx].id);
+  if (currentFixation && !currentFixation.spotifyPlaylistId && currentFixationQuestionsAndAnswers) {
     return (
       <div className={styles.FixationSessionHost} data-testid="FixationSessionHost">
+        <CountdownTimer key={currentQuestionIdx} secondsRemaining={fixationSessionSettings.timeLimit} stopTimerCallback={terminateQuestion}/>
         <FixationSessionQuestion
-          question={currentFixationQuestions[currentPaginatedQuestionIdx]}
-          answers={currentAnswers}
-          goToNextQuestionCallback={incrementCurrentPaginatedQuestionIdx}
+          question={currentFixationQuestionsAndAnswers[currentQuestionIdx].question}
+          questionIdx={currentQuestionIdx}
+          answers={currentFixationQuestionsAndAnswers[currentQuestionIdx].answers}
+          goToNextQuestionCallback={incrementCurrentQuestionIdx}
+        />
+        <FixationSessionAnswer
+          answers={currentFixationQuestionsAndAnswers[currentQuestionIdx].answers}
+          revealAnswers={showAnswers}
+          isMultipleChoice={fixationSessionSettings.multipleChoiceInd}
         />
       </div>
     )
