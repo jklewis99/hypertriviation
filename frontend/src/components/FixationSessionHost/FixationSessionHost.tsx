@@ -33,7 +33,7 @@ const FixationSessionHost = (props: FixationSessionHostProps) => {
   const [currentFixation, setCurrentFixation] = useState<Fixation>();
   const [currentFixationQuestions, setCurrentFixationQuestions] = useState<FixationQuestion[]>();
   const [currentFixationQuestionsAndAnswers, setCurrentFixationQuestionsAndAnswers] = useState<FixationQuestionAndAnswers[]>();
-  const [currentFixationAnswers, setCurrentFixationAnswers] = useState<FixationAnswer[]>();
+  const [currentFixationAnswers, setCurrentFixationAnswers] = useState<FixationAnswer[]>([]);
   const [currentQuestionIdx, setCurrentQuestionIdx] = useState<number>(0);
   const [showAnswers, setShowAnswers] = useState<boolean>(false);
   const [isEndOfFixation, setIsEndOfFixation] = useState<boolean>(false);
@@ -42,12 +42,14 @@ const FixationSessionHost = (props: FixationSessionHostProps) => {
     setIsWaitingToStart(false);
     setDoShowInstructions(true);
   }
+
   const handleSessionIsLive = () => {
     // TODO: make users unable to join
     setDoShowInstructions(false);
     setIsSessionLive(true);
     console.log("Session is live");
   }
+
   useEffect(() => {
     getFixationPlayers(fixationSession.code)
       .then((users) => {
@@ -71,6 +73,12 @@ const FixationSessionHost = (props: FixationSessionHostProps) => {
       handleUserJoined(JSON.parse(event.data))
     }
   });
+
+  useEffect(() => {
+    if (currentFixationQuestionsAndAnswers) {
+      setCurrentFixationAnswers(knuthShuffle(currentFixationQuestionsAndAnswers[currentQuestionIdx].answers))
+    }
+  }, [currentQuestionIdx, []])
 
   const handleUserJoined = (socketMessage: SocketEventReceived) => {
     console.log(socketMessage.data)
@@ -99,10 +107,6 @@ const FixationSessionHost = (props: FixationSessionHostProps) => {
       .catch((error: Error) => {
         console.log(error.message);
       });
-  }
-
-  const getCurrentQuestionAnswers = (questionId: number) => {
-    return currentFixationAnswers?.filter((answer: FixationAnswer) => answer.questionId === questionId) || [];
   }
 
   const incrementCurrentQuestionIdx = () => {
@@ -228,7 +232,7 @@ const FixationSessionHost = (props: FixationSessionHostProps) => {
           goToNextQuestionCallback={incrementCurrentQuestionIdx}
         />
         <FixationSessionAnswer
-          answers={currentFixationQuestionsAndAnswers[currentQuestionIdx].answers}
+          answers={currentFixationAnswers}
           revealAnswers={showAnswers}
           isMultipleChoice={fixationSessionSettings.multipleChoiceInd}
         />

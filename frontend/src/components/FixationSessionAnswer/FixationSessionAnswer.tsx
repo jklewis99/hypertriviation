@@ -43,7 +43,7 @@ const FixationSessionAnswer: FC<FixationSessionAnswerProps> = (props) => {
     <img src={puzzle} />,
   ]
 
-  const answers = knuthShuffle(props.answers);
+  const answers = props.answers;
   if (props.isMultipleChoice) {
     return (
       // <div className={styles.FixationSessionAnswer} data-testid="FixationSessionAnswer">
