@@ -19,4 +19,4 @@
 ![Select Fixation Page](../imgs/v0.0.1/example-answer-page.jpg)
 
 ## Create Fixation Page
-![](../imgs/v0.0.1/create-fixation.jpg)
+![Create Fixation Page](../imgs/v0.0.1/create-fixation-page.jpg)
