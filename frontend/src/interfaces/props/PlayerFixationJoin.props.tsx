@@ -1,4 +1,4 @@
 export interface PlayerFixationJoinProps {
   webSocket: WebSocket;
-  setJoinedCallback: () => void;
+  setJoinedCallback: (displayName: string) => void;
 }

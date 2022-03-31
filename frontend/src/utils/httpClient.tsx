@@ -1,6 +1,5 @@
 import axios from "axios"
 import camelCaseKeys from "camelcase-keys"
-import { useNavigate } from 'react-router-dom';
 import { baseUrl } from "./constants";
 
 var retryCount = 0;

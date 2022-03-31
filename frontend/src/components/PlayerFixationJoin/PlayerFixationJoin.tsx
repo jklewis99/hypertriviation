@@ -33,6 +33,7 @@ const PlayerFixationJoin = (props: PlayerFixationJoinProps) => {
     webSocket.send(JSON.stringify({
       message
     }));
+    props.setJoinedCallback(displayName);
   }
 
   return (
