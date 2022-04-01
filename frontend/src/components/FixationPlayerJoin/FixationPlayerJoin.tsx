@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { Button, Card, CardActions, CardContent, CardHeader, TextField } from '@mui/material';
 import { PlayerFixationJoinProps } from '../../interfaces/props/PlayerFixationJoin.props';
-import styles from './PlayerFixationJoin.module.scss';
+import styles from './FixationPlayerJoin.module.scss';
 import { JoinRoomEvent } from '../../interfaces/websockets/SocketEvents';
 
-const PlayerFixationJoin = (props: PlayerFixationJoinProps) => {
+const FixationPlayerJoin = (props: PlayerFixationJoinProps) => {
   const [roomCode, setRoomCode] = useState<string>("");
   const [displayName, setDisplayName] = useState<string>("");
   const maxDisplayNameLength = 16;
@@ -69,4 +69,4 @@ const PlayerFixationJoin = (props: PlayerFixationJoinProps) => {
     </div>
   );
 }
-export default PlayerFixationJoin;
+export default FixationPlayerJoin;

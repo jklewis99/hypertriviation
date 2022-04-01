@@ -13,10 +13,18 @@ interface FixationSessionAnswerProps {
   answers: FixationAnswer[];
   revealAnswers: boolean;
   isMultipleChoice: boolean;
+  isPlayer?: boolean;
+  submitAnswerCallback?: (answerId: number) => void;
 }
 
 const FixationSessionAnswer: FC<FixationSessionAnswerProps> = (props) => {
 
+  const handleAnswerClick = (answerId: number) => {
+    if (props.submitAnswerCallback) {
+      props.submitAnswerCallback(answerId);
+    }
+
+  }
   const answerOptionsStyles = [
     {
       backgroundColor: "#4287f5"
@@ -59,8 +67,13 @@ const FixationSessionAnswer: FC<FixationSessionAnswerProps> = (props) => {
           {answers.map((answer: FixationAnswer, i: number) => (
             <Grid item xs={6} >
               <Card
-                className={`${styles.answerCard} ${props.revealAnswers ? (!answer.correctAnswerInd ? styles.wrongAnswerCard : styles.correctAnswerCard) : ''}`}
-                style={props.revealAnswers && !answer.correctAnswerInd ? {} : answerOptionsStyles[i]}>
+                className={`${styles.answerCard}
+                            ${props.revealAnswers 
+                              ? (!answer.correctAnswerInd ? styles.wrongAnswerCard : styles.correctAnswerCard) : ''}
+                            ${props.isPlayer ? styles.clickable : ''}`}
+                style={props.revealAnswers && !answer.correctAnswerInd ? {} : answerOptionsStyles[i]}
+                onClick={() => handleAnswerClick(answer.id)}
+              >
                 <CardContent>
                   {answerIcons[i]}
                   <Typography>

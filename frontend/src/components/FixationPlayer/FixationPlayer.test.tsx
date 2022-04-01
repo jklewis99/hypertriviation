@@ -1,11 +1,11 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom/extend-expect';
-import PlayerFixation from './PlayerFixation';
+import FixationPlayer from './FixationPlayer';
 
 describe('<PlayerFixation />', () => {
   test('it should mount', () => {
-    render(<PlayerFixation />);
+    render(<FixationPlayer />);
     
     const playerFixation = screen.getByTestId('PlayerFixation');
 

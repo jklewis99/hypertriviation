@@ -15,7 +15,7 @@ import FixationView from '../FixationView/FixationView';
 import FixationStart from '../FixationStart/FixationStart';
 import FixationSessionHost from '../FixationSessionHost/FixationSessionHost';
 import { webSocketConnectionString } from '../../websockets/websockets';
-import PlayerFixation from '../PlayerFixation/PlayerFixation';
+import FixationPlayer from '../FixationPlayer/FixationPlayer';
 import { checkAuthentication, getAuthUrl } from '../../services/spotify.service';
 import UserForm from '../UserForm/UserForm';
 import UserProfile from '../UserProfile/UserProfile';
@@ -113,7 +113,7 @@ const AppRouter = () => {
           <Route path="/fixations/list" element={<FixationList />} />
           <Route path="/fixations/:roomName" element={<FixationView isSpotifyAuthenticated={isSpotifyAuthenticated} />} />
           <Route path="/fixations/session/:code" element={<FixationSessionHost webSocket={webSocket} isSpotifyAuthenticated={isSpotifyAuthenticated}/>} />
-          <Route path="/live" element={<PlayerFixation webSocket={webSocket}/>} />
+          <Route path="/live" element={<FixationPlayer webSocket={webSocket}/>} />
           <Route path="/user/access" element={<UserForm/>}/>
           <Route path="/user/myaccount" element={<UserProfile handleSpotifyAuthenticationCallback={authenticateSpotify}/>}/>
           
