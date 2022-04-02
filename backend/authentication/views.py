@@ -22,6 +22,8 @@ class HypertrviationUserCreate(APIView):
     permission_classes = (permissions.AllowAny,)
 
     def post(self, request, format='json'):
+        permission_classes = (permissions.AllowAny,)
+        print(request.data)
         serializer = HypertrviationUserSerializer(data=request.data)
         if serializer.is_valid():
             user = serializer.save()

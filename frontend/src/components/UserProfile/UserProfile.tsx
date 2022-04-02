@@ -83,7 +83,11 @@ const UserProfile = (props: UserProfileProps) => {
   }
 
   const goToHome = () => {
-    navigate('/')
+    navigate('/', {
+      state: {
+        isLoggedIn: true
+      }
+    });
   }
   return (
     <div className={styles.UserForm} data-testid="UserProfile">

@@ -8,7 +8,7 @@ import { FixationSessionSettings } from "../interfaces/FixationSessionSettings";
 import { FixationSessionUser } from "../interfaces/FixationSessionUser";
 import { FixationAnswerPayload } from "../interfaces/payloads/FixationAnswer.payload";
 import { SetFixationSessionSettings } from "../interfaces/payloads/SetFixationSessionSettings.payload";
-import httpClient from "../utils/httpClient";
+import httpClient, { getAuthorizationHeader } from "../utils/httpClient";
 
 const relativePath = "api/fixations";
 
@@ -24,7 +24,8 @@ export function createFixation(fixation: any): Promise<Fixation> {
   return new Promise((resolve, reject) => {
     httpClient.post(
       `${relativePath}/create`,
-      requestOptions
+      requestOptions,
+      getAuthorizationHeader()
     )
       .then(response => {
         resolve(response.data)
@@ -44,7 +45,8 @@ export function getAllFixations(): Promise<Fixation[]> {
   // };
   return new Promise((resolve, reject) => {
     httpClient.get(
-      `${relativePath}`
+      `${relativePath}`,
+      getAuthorizationHeader()
     )
       .then(response => {
         resolve(response.data)
@@ -72,7 +74,8 @@ export function getFixation(fixationId: number): Promise<Fixation> {
 export function getFixationQuestion(questionId: number): Promise<FixationQuestion> {
   return new Promise((resolve, reject) => {
     httpClient.get(
-      `${relativePath}/question/${questionId}`
+      `${relativePath}/question/${questionId}`,
+      getAuthorizationHeader()
     )
       .then(response => {
         resolve(response.data)
@@ -96,7 +99,8 @@ export function addFixationQuestion(question: FixationQuestion): Promise<Fixatio
   return new Promise((resolve, reject) => {
     httpClient.post(
       `${relativePath}/question`,
-      body
+      body,
+      getAuthorizationHeader()
     )
       .then(response => {
         resolve(response.data)
@@ -108,7 +112,9 @@ export function addFixationQuestion(question: FixationQuestion): Promise<Fixatio
 export function getFixationQuestionAnswers(questionId: number): Promise<FixationAnswer[]> {
   return new Promise((resolve, reject) => {
     httpClient.get(
-      `${relativePath}/answers/${questionId}`
+      `${relativePath}/answers/${questionId}`,
+      getAuthorizationHeader()
+      
     )
       .then(response => {
         resolve(response.data)
@@ -120,7 +126,8 @@ export function getFixationQuestionAnswers(questionId: number): Promise<Fixation
 export function getFixationQuestionsAndAnswers(fixationId: number, pageNumber: number): Promise<FixationQuestionAndAnswers[]> {
   return new Promise((resolve, reject) => {
     httpClient.get(
-      `${relativePath}/questions-and-answers?fixation_id=${fixationId}&page=${pageNumber}`
+      `${relativePath}/questions-and-answers?fixation_id=${fixationId}&page=${pageNumber}`,
+      getAuthorizationHeader()
     )
       .then(response => {
         resolve(response.data)
@@ -136,7 +143,8 @@ export function addFixationQuestionAnswer(answers: FixationAnswerPayload[]): Pro
   return new Promise((resolve, reject) => {
     httpClient.post(
       `${relativePath}/answers`,
-      requestBody
+      requestBody,
+      getAuthorizationHeader()
     )
       .then(response => {
         resolve(response.data)
@@ -149,7 +157,8 @@ export function setFixationQuestionAnswers(questionId: number): Promise<string> 
   throw Error;
   return new Promise((resolve, reject) => {
     httpClient.post(
-      `${relativePath}/answers/${questionId}`
+      `${relativePath}/answers/${questionId}`,
+      getAuthorizationHeader()
     )
       .then(response => {
         resolve(response.data)
@@ -162,7 +171,8 @@ export function setFixationSessionSettings(settings: SetFixationSessionSettings)
   return new Promise((resolve, reject) => {
     httpClient.post(
       `${relativePath}/set-settings`,
-      settings
+      settings,
+      getAuthorizationHeader()
     )
       .then(response => {
         resolve(response.data)
@@ -178,7 +188,8 @@ export function getFixationSessionSettings(code: string): Promise<FixationSessio
   // };
   return new Promise((resolve, reject) => {
     httpClient.get(
-      `${relativePath}/get-settings?code=${code}`
+      `${relativePath}/get-settings?code=${code}`,
+      getAuthorizationHeader()
     )
       .then(response => {
         resolve(response.data)
@@ -196,7 +207,8 @@ export function startFixationSession(fixationId: number, userId: number, setting
   return new Promise((resolve, reject) => {
     httpClient.post(
       `${relativePath}/start-session`,
-      requestOptions
+      requestOptions,
+      getAuthorizationHeader()
     )
     .then(response => {
       resolve(response.data)
@@ -208,7 +220,8 @@ export function startFixationSession(fixationId: number, userId: number, setting
 export function getFixationUsers(code: string): Promise<FixationSessionUser[]> {
   return new Promise((resolve, reject) => {
     httpClient.get(
-      `${relativePath}/get-users?code=${code}`
+      `${relativePath}/get-users?code=${code}`,
+      getAuthorizationHeader()
     )
     .then(response => {
       resolve(response.data)
@@ -220,7 +233,8 @@ export function getFixationUsers(code: string): Promise<FixationSessionUser[]> {
 export function getFixationPlayers(code: string): Promise<FixationSessionPlayer[]> {
   return new Promise((resolve, reject) => {
     httpClient.get(
-      `${relativePath}/get-players?code=${code}`
+      `${relativePath}/get-players?code=${code}`,
+      getAuthorizationHeader()
     )
     .then(response => {
       resolve(response.data)
