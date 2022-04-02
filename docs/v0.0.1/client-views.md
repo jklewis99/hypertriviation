@@ -18,5 +18,11 @@
 ## Example Answer Page
 ![Select Fixation Page](../imgs/v0.0.1/example-answer-page.jpg)
 
+## Example Answer Page for Playlist Fixation
+![Create Fixation Page](../imgs/v0.0.1/example-spotify-playlist-fixation.jpg)
+
+## Example End of Answer Page for Playlist Fixation
+![Create Fixation Page](../imgs/v0.0.1/example-spotify-playlist-fixation-end.jpg)
+
 ## Create Fixation Page
 ![Create Fixation Page](../imgs/v0.0.1/create-fixation-page.jpg)

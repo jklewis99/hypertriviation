@@ -215,7 +215,6 @@ const FixationSessionHost = (props: FixationSessionHostProps) => {
   if (playlistId != "") {
     return (
       <div className={styles.FixationSessionHost} data-testid="FixationSessionHost">
-        {`spotify:playlist:${playlistId}`}
         <MusicPlayer spotifyUri={`spotify:playlist:${playlistId}`}/>
       </div>
     );

@@ -53,6 +53,7 @@ const MusicPlayer = (props: MusicPlayerProps) => {
   }
 
   const togglePlay = () => {
+    debugger;
     if (isFirstPlay) {
       shuffle();
       setButtons();
@@ -64,6 +65,7 @@ const MusicPlayer = (props: MusicPlayerProps) => {
   }
 
   const shuffle = () => {
+    debugger;
     setTimeout( () => setToShuffle(true).then((response) => { console.log(response); return; }), 2000);
   }
 
