@@ -1,6 +1,6 @@
 import { HypertriviationUser } from "../interfaces/HypertriviationUser";
 import { UserAuthorization } from "../interfaces/UserAuthorization";
-import httpClient from "../utils/httpClient";
+import httpClient, { getAuthorizationHeader } from "../utils/httpClient";
 
 const relativePath = "authapi";
 
@@ -12,7 +12,8 @@ export function login(username: string, password: string): Promise<UserAuthoriza
   return new Promise((resolve, reject) => {
     httpClient.post(
       `${relativePath}/token/obtain/`,
-      user
+      user,
+      getAuthorizationHeader()
     )
       .then(response => {
         resolve(response.data)
@@ -50,6 +51,7 @@ export function getUser(username?: string): Promise<HypertriviationUser> {
   return new Promise((resolve, reject) => {
     httpClient.get(
       `${relativePath}/user/get`,
+      getAuthorizationHeader()
     )
       .then(response => {
         resolve(response.data)

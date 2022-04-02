@@ -1,6 +1,6 @@
 import { PlaylistsResponse } from "../interfaces/payloads/Playlists.payload";
 import { SpotifyAuthenticationStatus } from "../interfaces/SpotifyAuthenticationStatus";
-import httpClient from "../utils/httpClient";
+import httpClient, { getAuthorizationHeader } from "../utils/httpClient";
 
 const relativePath = "/spotify";
 
@@ -11,7 +11,8 @@ export function checkAuthentication(userId: number): Promise<SpotifyAuthenticati
   // };
   return new Promise((resolve, reject) => {
     httpClient.get(
-      `${relativePath}/is-authenticated?userId=${userId}`
+      `${relativePath}/is-authenticated?userId=${userId}`,
+      getAuthorizationHeader()
     )
       .then(response => {
         resolve(response.data)
@@ -24,7 +25,8 @@ export function getAuthUrl(userId: number): Promise<any> {
 
   return new Promise((resolve, reject) => {
     httpClient.get(
-      `${relativePath}/get-auth-url?userId=${userId}`
+      `${relativePath}/get-auth-url?userId=${userId}`,
+      getAuthorizationHeader()
     )
       .then(response => {
         resolve(response.data)
@@ -38,7 +40,8 @@ export function setTokens(requestBody: {[key: string]: string | number}) {
   return new Promise((resolve, reject) => {
     httpClient.post(
       `${relativePath}/set-tokens`,
-      requestBody
+      requestBody,
+      getAuthorizationHeader()
     )
       .then(response => {
         resolve(response.data)
@@ -50,7 +53,8 @@ export function setTokens(requestBody: {[key: string]: string | number}) {
 export function getTokens(userId: number): Promise<any> {
   return new Promise((resolve, reject) => {
     httpClient.get(
-      `${relativePath}/get-tokens?userId=${userId}`
+      `${relativePath}/get-tokens?userId=${userId}`,
+      getAuthorizationHeader()
     )
       .then(response => {
         resolve(response.data)
@@ -62,7 +66,8 @@ export function getTokens(userId: number): Promise<any> {
 export function getPlaylists(userId: number): Promise<PlaylistsResponse> {
   return new Promise((resolve, reject) => {
     httpClient.get(
-      `${relativePath}/get-playlists?userId=${userId}`
+      `${relativePath}/get-playlists?userId=${userId}`,
+      getAuthorizationHeader()
     )
       .then(response => {
         resolve(response.data)
@@ -74,7 +79,8 @@ export function getPlaylists(userId: number): Promise<PlaylistsResponse> {
 export function setToShuffle(state: boolean = true, device_id: string = ""): Promise<any> {
   return new Promise((resolve, reject) => {
     httpClient.put(
-      `${relativePath}/shuffle?state=${state}&deviceId=${device_id}`
+      `${relativePath}/shuffle?state=${state}&deviceId=${device_id}`,
+      getAuthorizationHeader()
     )
       .then(response => {
         resolve(response.data)

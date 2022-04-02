@@ -8,7 +8,6 @@ const httpClient = axios.create({
   baseURL: "http://127.0.0.1:8000/",
   timeout: 30000,
   headers: {
-    'Authorization': "Bearer " + localStorage.getItem('accessToken'),
     'Content-Type': 'application/json',
     'accept': 'application/json'
   }
@@ -31,7 +30,6 @@ httpClient.interceptors.response.use(
       originalRequest._retry = true;
       // handle when refresh token expires
       if (retryCount > 5) {
-        debugger;
         localStorage.removeItem('refreshToken');
         window.location.href = baseUrl + "/user/access"; // TODO: change this
         retryCount = 0;
@@ -57,5 +55,13 @@ httpClient.interceptors.response.use(
     return Promise.reject(error)
   }
 );
+
+export function getAuthorizationHeader() {
+  return {
+    headers: {
+      'Authorization': "Bearer " + localStorage.getItem('accessToken')
+    }
+  }
+}
 
 export default httpClient

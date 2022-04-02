@@ -152,7 +152,7 @@ const FixationCreate: FC<FixationCreateProps> = (props) => {
         </CardContent>
         <FixationSettings setSettingsCallback={setSettings} />
         <CardActions className="card-actions">
-          <Button size="medium" variant="contained" color="secondary" onClick={() => {}} style={{ margin: "10px 20px" }}>Exit</Button>
+          <Button size="medium" variant="contained" color="secondary" onClick={() => navigate(-1)} style={{ margin: "10px 20px" }}>Exit</Button>
           <Button size="medium" variant="contained" color="primary" onClick={setFixationSettings} style={{ margin: "0 20px" }}>Start</Button>
         </CardActions>
       </Card>

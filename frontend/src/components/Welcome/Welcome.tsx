@@ -7,7 +7,8 @@ import {
   Routes,
   Route,
   Link,
-  useNavigate
+  useNavigate,
+  useLocation
 } from "react-router-dom";
 import hypertriviation from '../../assets/icons/hypertriviation.svg';
 import math from '../../assets/icons/math.svg';
@@ -19,12 +20,14 @@ import { WelcomeProps } from '../../interfaces/props/Welcome.props';
 
 const Welcome = (props: WelcomeProps) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const goToMyAccount = () => {
     navigate("/user/myaccount");
   }
   const goToSignIn = () => {
     navigate("/user/access");
   }
+  const isLoggedIn = props.isLoggedIn || location?.state?.isLoggedIn || false
 
   return (
     <div className={styles.Welcome}>
@@ -58,8 +61,8 @@ const Welcome = (props: WelcomeProps) => {
           </Grid>
         </Grid>
       </div>
-      <Button className={styles.myAccountButton} variant="contained" color="primary" onClick={props.isLoggedIn ? goToMyAccount : goToSignIn}>
-        {props.isLoggedIn ? "My Account" : "Log In/Sign Up"}
+      <Button className={styles.myAccountButton} variant="contained" color="primary" onClick={isLoggedIn ? goToMyAccount : goToSignIn}>
+        {isLoggedIn ? "My Account" : "Log In/Sign Up"}
       </Button>
     </div>
   );

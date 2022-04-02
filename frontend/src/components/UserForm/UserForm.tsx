@@ -104,7 +104,6 @@ const UserForm = () => {
     if (isRegistrataion){
       register(values.username, values.password, values.email, values.firstName, values.lastName)
         .then((data) => {
-          debugger;
           localStorage.setItem('accessToken', data.access);
           localStorage.setItem('refreshToken', data.refresh);
           navigate("/user/myaccount");
