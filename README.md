@@ -2,9 +2,47 @@
 
 ## Running Locally
 
+
+## Getting Started
+Ensure you have Python 3.9 installed. You can use pip or anaconda. You can download the latest version [here](https://www.python.org/downloads/).
+### 1. Clone the repository
+Navigate to the folder in which you want to store this repository. Then clone the repository and change directory to the repository:
+```
+https://github.com/jklewis99/hypertriviation.git
+cd hypertriviation
+```
+### 2. Activate a virtual environment (optional, but recommended):
+#### With pip:
+_Windows_
+```
+py -m venv [ENV_NAME]
+.\[ENV_NAME]\Scripts\activate
+```
+
+_Linux/Mac_
+```
+python3 -m venv [ENV_NAME]
+source [ENV_NAME]/bin/activate
+```
+
+#### With conda:
+```
+conda update conda
+conda create -n [ENV_NAME]
+conda activate [ENV_NAME]
+conda install pip # install pip to allow easy requirements.txt install
+```
+### 3. Install the requirements:
+
+```
+# ~/hypertriviation/
+cd backend
+pip install -r requirements.txt
+```
+
 ### Backend
 
-The backend is built in Python 3.10 with Django REST framework. Tables are structured in SQL databases
+The backend is built in Python 3.9 with Django REST framework. Tables are structured in SQL databases
 
 1. Setup environment
 
@@ -55,11 +93,13 @@ The backend is built in Python 3.10 with Django REST framework. Tables are struc
 
 ## Frontend
 The frontend is built using React and TypeScript.
-See the `README.md` in [`/frontend`](/frontend/README.md) for all specifications are running the front end.
+See the `README.md` in [`/frontend`](/frontend/README.md) for all specifications for running the front end.
 
-To Make new components:
+Transpile/Compile code for local browser (after navigating to the root of this folder)
 ```
-npx generate-react-cli component MusicPlayer
+# ~/hypertriviation/
+cd frontend
+npm start
 ```
 
 ## Acknowledgements

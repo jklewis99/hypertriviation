@@ -8,12 +8,12 @@ interface FixationSessionQuestionProps {
   question: FixationQuestion;
   questionIdx: number;
   answers: FixationAnswer[];
-  goToNextQuestionCallback: () => void;
+  hasPrevious: boolean;
+  goToNextQuestionCallback: (change: number) => void;
 }
 
 const FixationSessionQuestion: FC<FixationSessionQuestionProps> = (props) => {
   const fixationQuestion = props.question;
-  const fixationQuestionAnswers = props.answers;
   const questionIdx = props.questionIdx;
 
   return (
@@ -36,12 +36,26 @@ const FixationSessionQuestion: FC<FixationSessionQuestionProps> = (props) => {
           {/* video_url */}
           {/* spotify_url? */}
         </CardContent>
-        <CardActions className="card-actions">
+        <CardActions className="card-actions-spread">
+          {
+            props.hasPrevious
+            ?
+            <Button
+              size="medium"
+              variant="contained"
+              color="primary"
+              onClick={() => props.goToNextQuestionCallback(-1)}>
+              Previous
+            </Button>
+            :
+            null
+          }
           <Button
             size="medium"
             variant="contained"
             color="secondary"
-            onClick={props.goToNextQuestionCallback}>
+            onClick={() => props.goToNextQuestionCallback(1)}
+            style={{marginLeft: "auto"}}>
             Next
           </Button>
         </CardActions>

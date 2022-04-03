@@ -16,10 +16,11 @@ export function createFixation(fixation: any): Promise<Fixation> {
   const requestOptions = {
     "created_by": fixation.createdBy,
     "fixation_title": fixation.title,
-    "category": "Other",
+    "category": fixation.category,
     "description": fixation.description,
     "img_url": fixation.imgUrl,
-    "keep_shuffled": true
+    "keep_shuffled": true,
+    "spotify_playlist_id": fixation.spotifyPlaylist
   };
   return new Promise((resolve, reject) => {
     httpClient.post(

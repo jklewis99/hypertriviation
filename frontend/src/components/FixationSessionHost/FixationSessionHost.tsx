@@ -75,7 +75,8 @@ const FixationSessionHost = (props: FixationSessionHostProps) => {
   });
 
   useEffect(() => {
-    if (currentFixationQuestionsAndAnswers) {
+    if (currentFixationQuestionsAndAnswers && currentFixationQuestionsAndAnswers.length > currentQuestionIdx) {
+      console.log(currentFixationQuestionsAndAnswers)
       setCurrentFixationAnswers(knuthShuffle(currentFixationQuestionsAndAnswers[currentQuestionIdx].answers))
     }
   }, [currentQuestionIdx, []])
@@ -109,13 +110,13 @@ const FixationSessionHost = (props: FixationSessionHostProps) => {
       });
   }
 
-  const incrementCurrentQuestionIdx = () => {
-    if (currentFixationQuestionsAndAnswers && currentQuestionIdx === currentFixationQuestionsAndAnswers.length - 1) {
+  const incrementCurrentQuestionIdx = (change: number) => {
+    if (change > 0 && currentFixationQuestionsAndAnswers && currentQuestionIdx === currentFixationQuestionsAndAnswers.length - 1) {
       setIsEndOfFixation(true);
       return;
     }
     revealAnswer(false);
-    setCurrentQuestionIdx(currentQuestionIdx + 1);
+    setCurrentQuestionIdx(currentQuestionIdx + change);
   }
 
   const terminateQuestion = (answerSubmitted: boolean = false) => {
@@ -226,8 +227,9 @@ const FixationSessionHost = (props: FixationSessionHostProps) => {
         <CountdownTimer key={currentQuestionIdx} secondsRemaining={fixationSessionSettings.timeLimit} stopTimerCallback={terminateQuestion}/>
         <FixationSessionQuestion
           question={currentFixationQuestionsAndAnswers[currentQuestionIdx].question}
-          questionIdx={currentQuestionIdx}
+          questionIdx={currentQuestionIdx + 1}
           answers={currentFixationQuestionsAndAnswers[currentQuestionIdx].answers}
+          hasPrevious={currentQuestionIdx > 0}
           goToNextQuestionCallback={incrementCurrentQuestionIdx}
         />
         <FixationSessionAnswer

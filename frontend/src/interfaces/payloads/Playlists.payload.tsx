@@ -8,7 +8,7 @@ export interface PlaylistsResponse {
   total: number;
 }
 
-interface Playlist {
+export interface Playlist {
   collaborative: boolean;
   description: string;
   externalUrls: ExternalUrls;

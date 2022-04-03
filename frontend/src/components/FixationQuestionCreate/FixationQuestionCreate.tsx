@@ -198,15 +198,12 @@ const FixationQuestionCreate: FC<FixationQuestionCreateProps> = (props) => {
 
   return (
     <div className={styles.FixationQuestionCreate} data-testid="FixationQuestionCreate">
-      FixationQuestionCreate 
       <Card className="main-card" style={{overflowY: "scroll"}}>
         <CardHeader title="Create New Fixation Question" />
         <Divider />
         <CardContent>
           Question #{currentQuestion.questionIdx}
           <InputLabel id="demo-simple-select-label">Category Type</InputLabel>
-          
-
           <FormControl required fullWidth margin="normal">
             <TextField
               value={currentQuestion.questionTxt}

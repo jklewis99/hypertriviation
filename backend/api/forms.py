@@ -10,9 +10,9 @@ class FixationForm(forms.Form):
     fixation_title = forms.CharField(max_length=50, required=True)
     category = forms.ChoiceField(choices=FixationCategory.choices, required=False)
     description = forms.CharField(max_length=240, required=False)
-    img_url = forms.CharField(max_length=100, required=False) # change this
+    img_url = forms.CharField(max_length=1000, required=False) # change this
     keep_shuffled = forms.BooleanField(required=False)
-    spotify_playlist_id = forms.CharField(max_length=12, required=False)
+    spotify_playlist_id = forms.CharField(max_length=64, required=False)
     spotify_random_start_ind = forms.BooleanField(required=False)
     default_duration = forms.IntegerField(required=False)
 

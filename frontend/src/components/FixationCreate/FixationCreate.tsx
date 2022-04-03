@@ -1,11 +1,13 @@
 import { Button, Card, CardActions, CardContent, CardHeader, Divider, FormControl, FormControlLabel, FormGroup, Input, InputLabel, Switch, TextField, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
 import React, { FC, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { PlaylistsResponse } from '../../interfaces/payloads/Playlists.payload';
+import { Playlist, PlaylistsResponse } from '../../interfaces/payloads/Playlists.payload';
 import { SetFixationSessionSettings } from '../../interfaces/payloads/SetFixationSessionSettings.payload';
 import { createFixation } from '../../services/fixation.service';
 import { getPlaylists } from '../../services/spotify.service';
 import FixationSettings from '../FixationSettings/FixationSettings';
+import SpotifyPlaylistItem from '../SpotifyPlaylistItem/SpotifyPlaylistItem';
+import SpotifyPlaylistList from '../SpotifyPlaylistList/SpotifyPlaylistList';
 import styles from './FixationCreate.module.scss';
 
 interface FixationCreateProps {
@@ -19,9 +21,20 @@ const FixationCreate: FC<FixationCreateProps> = (props) => {
     title: "",
     description: "",
     imgUrl: "",
-    spotifyPlaylist: null,
+    spotifyPlaylist: "",
     createdBy: props.userId
   });
+  // TODO: Change to Interface or user Fixation interface
+  const [newFixationSettings, setNewFixationSettings] = useState({
+    isMultipleChoice: false,
+    doShowHints: true,
+    isRandomlyShuffled: true,
+    doStopOnAnswer: false,
+    timeLimit: 30,
+  });  
+  const [isSpotifyPlaylistListOpen, setIsSpotifyPlaylistListOpen] = useState<boolean>(false);
+  const [spotifyPlaylists, setSpotifyPlaylists] = useState<Playlist[]>([]);
+  const [selectedPlaylist, setSelectedPlaylist] = useState<Playlist>();
 
   // TODO: Do not hard code these values...
   const fixationCategories: string[] = [
@@ -29,14 +42,6 @@ const FixationCreate: FC<FixationCreateProps> = (props) => {
     "Secret Codes",
     "Other"
   ];
-
-  const [newFixationSettings, setNewFixationSettings] = useState({
-    isMultipleChoice: false,
-    doShowHints: true,
-    isRandomlyShuffled: true,
-    doStopOnAnswer: false,
-    timeLimit: 30,
-  });
 
   const setSettings = (event: any, value?: number) => {
     if (value) {
@@ -53,8 +58,11 @@ const FixationCreate: FC<FixationCreateProps> = (props) => {
   };
 
   const getMyPlaylists = () => {
+    //TODO: add cache for multiclicking
     getPlaylists(1).then(
       (data: PlaylistsResponse) => {
+        setSpotifyPlaylists(data.items);
+        setIsSpotifyPlaylistListOpen(true);
         console.log(data.items)
       }
     )
@@ -70,9 +78,14 @@ const FixationCreate: FC<FixationCreateProps> = (props) => {
       time_limit: newFixationSettings.timeLimit
     };
     console.log(fixationSettings);
-    createFixation(newFixationValues)
+    createFixation({...newFixationValues, category: fixationCategory})
       .then((fixation) => {
-        navigate(`/fixations/create/${fixation.id}`, { state: [fixation.id , 1] }); // TODO: pass id in only one place
+        if (fixation.category !== "Music") {
+          navigate(`/fixations/create/${fixation.id}`, { state: [fixation.id , 1] }); // TODO: pass id in only one place
+        }
+        else {
+          navigate("/");
+        }
       })
       .catch((error: Error) => {
         console.log(error.message);
@@ -85,6 +98,15 @@ const FixationCreate: FC<FixationCreateProps> = (props) => {
   }
 
   const handleCategoryChange = (event: any, value: string) => setFixationCategory(value);
+
+  const handleClosePopup = () => setIsSpotifyPlaylistListOpen(false);
+
+  const selectPlaylist = (playlist: Playlist) => {
+    console.log(playlist);
+    setSelectedPlaylist(playlist);
+    setNewFixationValues({ ...newFixationValues, imgUrl: playlist.images[0].url, spotifyPlaylist: playlist.id });
+    handleClosePopup();
+  } 
 
   return (
     <div className={styles.FixationCreate} data-testid="FixationCreate">
@@ -111,7 +133,11 @@ const FixationCreate: FC<FixationCreateProps> = (props) => {
           </ToggleButtonGroup>
           {fixationCategory === "Music"
             ?
-            <Button onClick={getMyPlaylists}>Choose a Playlist</Button>
+            <CardContent>
+              {/* {selectedPlaylist ? <SpotifyPlaylistItem playlist={selectedPlaylist} onClick={selectPlaylist}></SpotifyPlaylistItem> : null} */}
+              {selectedPlaylist ? "Playlist: " + selectedPlaylist.name : null }
+              <Button onClick={getMyPlaylists}>{newFixationValues.spotifyPlaylist ? "Change" : "Choose a Playlist"}</Button>
+            </CardContent>
             :
             null
           }
@@ -143,6 +169,7 @@ const FixationCreate: FC<FixationCreateProps> = (props) => {
               label="Image URL"
               required
               className={styles.inputs}
+              value={newFixationValues.imgUrl}
               // multiline
               // maxRows={4}
               onChange={(event) => handleChange("imgUrl", event)}
@@ -153,9 +180,25 @@ const FixationCreate: FC<FixationCreateProps> = (props) => {
         <FixationSettings setSettingsCallback={setSettings} />
         <CardActions className="card-actions">
           <Button size="medium" variant="contained" color="secondary" onClick={() => navigate(-1)} style={{ margin: "10px 20px" }}>Exit</Button>
-          <Button size="medium" variant="contained" color="primary" onClick={setFixationSettings} style={{ margin: "0 20px" }}>Start</Button>
+          <Button size="medium" variant="contained" color="primary" onClick={setFixationSettings} style={{ margin: "0 20px" }}>
+            {
+              fixationCategory === "Music"
+              ?
+              "Create"
+              : 
+              "Start"
+            }
+          </Button>
         </CardActions>
       </Card>
+      {
+        isSpotifyPlaylistListOpen
+        ?
+        <div>
+          <Card className="pop-up-module" />
+          <SpotifyPlaylistList playlists={spotifyPlaylists} closeModalCallback={handleClosePopup} selectPlaylistCallback={selectPlaylist}/>
+        </div>
+        : null}
     </div>
   );
 }
