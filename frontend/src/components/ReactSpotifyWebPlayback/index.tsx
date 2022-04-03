@@ -125,12 +125,14 @@ class SpotifyWebPlayer extends React.PureComponent<Props, State> {
       needsUpdate: false,
       nextTracks: [],
       playerPosition: 'bottom',
-      position: 0,
+      position: props.position || 0,
       previousTracks: [],
       progressMs: 0,
       status: STATUS.IDLE,
       track: this.emptyTrack,
       volume: parseVolume(props.initialVolume) || 1,
+      isFirstPlay: true,
+      initialTimeRemainingMs: 0
     };
 
     this.styles = getMergedStyles(props.styles);
@@ -176,6 +178,7 @@ class SpotifyWebPlayer extends React.PureComponent<Props, State> {
       syncExternalDevice,
       token,
       uris,
+      position
     } = this.props;
     const isReady = previousState.status !== STATUS.READY && status === STATUS.READY;
     const changedURIs = Array.isArray(uris)
@@ -227,6 +230,18 @@ class SpotifyWebPlayer extends React.PureComponent<Props, State> {
         ...this.state,
         type: TYPE.TRACK,
       });
+      if (this.state.isFirstPlay && this.props.position) {
+        // HACK to get first play to be offset by position prop
+        const previousVolume = this.state.volume;
+        this.setVolume(0);
+        setTimeout(() => {
+          this.handleChangeRange(this.props.position || 0);
+          this.setVolume(previousVolume);
+        }, 250);
+      }
+      else if (previousProps.position) {
+        this.handleChangeRange(previousProps.position);
+      }
 
       if (showSaveIcon) {
         this.updateState({ isSaved: false });
@@ -319,10 +334,11 @@ class SpotifyWebPlayer extends React.PureComponent<Props, State> {
         if (state) {
           progress = Math.round(state.track_window.current_track.duration_ms * percentage);
           await this.player.seek(progress);
-
           this.updateState({
             position,
             progressMs: progress,
+            initialTimeRemainingMs: state.duration - progress,
+            isFirstPlay: false
           });
         } else {
           this.updateState({ position: 0 });
@@ -877,6 +893,8 @@ class SpotifyWebPlayer extends React.PureComponent<Props, State> {
       status,
       track,
       volume,
+      isFirstPlay,
+      initialTimeRemainingMs
     } = this.state;
     const { locale, name, showSaveIcon, token, updateSavedStatus } = this.props;
     const isReady = [STATUS.READY, STATUS.UNSUPPORTED].indexOf(status) >= 0;
@@ -892,7 +910,7 @@ class SpotifyWebPlayer extends React.PureComponent<Props, State> {
 
     if (isReady) {
       /* istanbul ignore else */
-      if (!info) {
+      if (!info && initialTimeRemainingMs > 0) {
         info = (
           <Info
             isActive={isActive}
@@ -903,6 +921,7 @@ class SpotifyWebPlayer extends React.PureComponent<Props, State> {
             token={token}
             track={track}
             updateSavedStatus={updateSavedStatus}
+            timeRemainingMs={initialTimeRemainingMs}
           />
         );
       }
@@ -921,12 +940,12 @@ class SpotifyWebPlayer extends React.PureComponent<Props, State> {
             previousTracks={previousTracks}
             styles={this.styles}
           />
-          <Volume
+          {/* <Volume
             playerPosition={playerPosition}
             setVolume={this.setVolume}
             volume={volume}
             title={"volume"}
-          />
+          /> */}
         </div>
       );
     }

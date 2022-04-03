@@ -26,6 +26,7 @@ export interface Props {
   token: string;
   updateSavedStatus?: (fn: (status: boolean) => any) => any;
   uris?: string | string[];
+  position?: number;
 }
 
 export interface State {
@@ -49,6 +50,8 @@ export interface State {
   status: string;
   track: SpotifyPlayerTrack;
   volume: number;
+  isFirstPlay: boolean;
+  initialTimeRemainingMs: number;
 }
 
 export interface ComponentsProps {

@@ -17,8 +17,12 @@ const MusicPlayer = (props: MusicPlayerProps) => {
   const [togglePlayButton, setTogglePlayButton] = useState<HTMLElement>();
   const [toggleNextButton, setToggleNextButton] = useState<HTMLElement>();
   let isFirstPlay = true;
+  const spotifyUri = props.spotifyUri;
+  const playlistOffset = props.playlistOffset;
+  const songOffset = props.songOffset;
 
   useEffect(() => {
+    console.log("MUSIC PROPS: ", playlistOffset, songOffset);
     getTokens(1).then((data) => {
       setToken(data.accessToken);
     })
@@ -53,7 +57,6 @@ const MusicPlayer = (props: MusicPlayerProps) => {
   }
 
   const togglePlay = () => {
-    debugger;
     if (isFirstPlay) {
       shuffle();
       setButtons();
@@ -61,7 +64,6 @@ const MusicPlayer = (props: MusicPlayerProps) => {
     }
     console.log(togglePlayButton);
     togglePlayButton?.click();
-    
   }
 
   const shuffle = () => {
@@ -73,7 +75,7 @@ const MusicPlayer = (props: MusicPlayerProps) => {
     <div className={styles.MusicPlayer} data-testid="MusicPlayer">
       <Card>
         {token !== "" ?
-          <SpotifyPlayer token={token} uris={props.spotifyUri} callback={aCallback} />
+          <SpotifyPlayer token={token} uris={spotifyUri} callback={aCallback} offset={playlistOffset} position={songOffset}/>
           :
           null}
 

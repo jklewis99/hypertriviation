@@ -17,6 +17,7 @@ interface FixationCreateProps {
 const FixationCreate: FC<FixationCreateProps> = (props) => {
   const navigate = useNavigate();
   const [fixationCategory, setFixationCategory] = useState<string>();
+  // TODO: Change to Interface or user Fixation interface
   const [newFixationValues, setNewFixationValues] = useState({
     title: "",
     description: "",
@@ -24,7 +25,6 @@ const FixationCreate: FC<FixationCreateProps> = (props) => {
     spotifyPlaylist: "",
     createdBy: props.userId
   });
-  // TODO: Change to Interface or user Fixation interface
   const [newFixationSettings, setNewFixationSettings] = useState({
     isMultipleChoice: false,
     doShowHints: true,
@@ -58,14 +58,17 @@ const FixationCreate: FC<FixationCreateProps> = (props) => {
   };
 
   const getMyPlaylists = () => {
-    //TODO: add cache for multiclicking
-    getPlaylists(1).then(
-      (data: PlaylistsResponse) => {
-        setSpotifyPlaylists(data.items);
-        setIsSpotifyPlaylistListOpen(true);
-        console.log(data.items)
-      }
-    )
+    // trivial client-side cache solution
+    // TODO: add refresh button or timer to retrieve newly created/saved playlists
+    if (spotifyPlaylists.length === 0) {
+      getPlaylists(1).then(
+        (data: PlaylistsResponse) => {
+          setSpotifyPlaylists(data.items);
+          console.log(data.items)
+        }
+      )
+    }
+    setIsSpotifyPlaylistListOpen(true);
   }
 
   const setFixationSettings = () => {
@@ -133,16 +136,26 @@ const FixationCreate: FC<FixationCreateProps> = (props) => {
           </ToggleButtonGroup>
           {fixationCategory === "Music"
             ?
-            <CardContent>
-              {/* {selectedPlaylist ? <SpotifyPlaylistItem playlist={selectedPlaylist} onClick={selectPlaylist}></SpotifyPlaylistItem> : null} */}
-              {selectedPlaylist ? "Playlist: " + selectedPlaylist.name : null }
+            <CardContent >
+              {
+                selectedPlaylist
+                ?
+                <div className={styles.playlistContainer}>
+                  <div style={{width: "100%", maxWidth: "400px"}}>
+                    <SpotifyPlaylistItem playlist={selectedPlaylist} onClick={selectPlaylist} orientation={true}/>
+                  </div>
+                </div>
+                :
+                null
+              }
+              {/* {selectedPlaylist ? "Playlist: " + selectedPlaylist.name : null } */}
               <Button onClick={getMyPlaylists}>{newFixationValues.spotifyPlaylist ? "Change" : "Choose a Playlist"}</Button>
             </CardContent>
             :
             null
           }
 
-          <FormControl required fullWidth margin="normal">
+          <FormControl required fullWidth margin="normal" sx={{zIndex: 0}}>
             <TextField
               name="title"
               label="Fixation Title"
@@ -151,7 +164,7 @@ const FixationCreate: FC<FixationCreateProps> = (props) => {
               onChange={(event) => handleChange("title", event)}
             />
           </FormControl>
-          <FormControl required fullWidth margin="normal">
+          <FormControl required fullWidth margin="normal" sx={{zIndex: 0}}>
             <TextField
               name="description"
               label="Description"
@@ -163,7 +176,7 @@ const FixationCreate: FC<FixationCreateProps> = (props) => {
               onChange={(event) => handleChange("description", event)}
             />
           </FormControl>
-          <FormControl required fullWidth margin="normal">
+          <FormControl required fullWidth margin="normal" sx={{zIndex: 0}}>
             <TextField
               name="imageUrl"
               label="Image URL"

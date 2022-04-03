@@ -1,8 +1,18 @@
 .SpotifyPlaylistItem {
-    display: flex;
-    flex-direction: column;
-    background-color: #181818 !important;
-    color: white !important;
-    // height: 200px;
-    padding: 4px;
+
+    .SpotifyPlaylistItemVertical, .SpotifyPlaylistItemHorizontal {
+        display: flex;
+        background-color: #181818 !important;
+        color: white !important;
+        padding: 4px;
+    }
+
+    .SpotifyPlaylistItemVertical {
+        flex-direction: column;
+    }
+
+    .SpotifyPlaylistItemHorizontal {
+        flex-direction: row;
+        max-height: 75px;
+    }
 }

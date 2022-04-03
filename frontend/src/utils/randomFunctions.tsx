@@ -41,3 +41,13 @@ export function knuthShuffle(array: any[]) {
 
   return array;
 }
+
+/**
+ * returns a random number between min (inclusive) and max (exclusive)
+ * @param min 
+ * @param max 
+ * @returns 
+ */
+export function getRandomInt(min: number, max: number) {
+  return Math.floor(Math.random() * (max - min) + min); //The maximum is exclusive and the minimum is inclusive
+}

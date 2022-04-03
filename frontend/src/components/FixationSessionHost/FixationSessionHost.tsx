@@ -15,19 +15,17 @@ import FixationSessionQuestion from '../FixationSessionQuestion/FixationSessionQ
 import { FixationQuestion } from '../../interfaces/FixationQuestion';
 import { FixationAnswer } from '../../interfaces/FixationAnswer';
 import { FixationSessionSettings } from '../../interfaces/FixationSessionSettings';
-import { knuthShuffle } from '../../utils/randomFunctions';
+import { getRandomInt, knuthShuffle } from '../../utils/randomFunctions';
 import { FixationQuestionAndAnswers } from '../../interfaces/FixationQuestionsAndAnswers';
 import CountdownTimer from '../CountdownTimer/CountdownTimer';
 import FixationSessionAnswer from '../FixationSessionAnswer/FixationSessionAnswer';
+import FixationSessionEnd from '../FixationSessionEnd/FixationSessionEnd';
 
 const FixationSessionHost = (props: FixationSessionHostProps) => {
   const [errorMessage, setErrorMessage] = useState<string>("");
   const [isWaitingToStart, setIsWaitingToStart] = useState<boolean>(true);
   const [doShowInstructions, setDoShowInstructions] = useState<boolean>(false);
   const [isSessionLive, setIsSessionLive] = useState<boolean>(false);
-  const fixationSession: FixationSession = useLocation().state.session;
-  const fixationSessionSettings: FixationSessionSettings = useLocation().state.sessionSettings;
-  const webSocket = useRef<WebSocket>(props.webSocket);
   const [joinedUsers, setJoinedUsers] = useState<FixationSessionPlayer[]>([]);
   const [playlistId, setPlaylistId] = useState<string>();
   const [currentFixation, setCurrentFixation] = useState<Fixation>();
@@ -37,18 +35,9 @@ const FixationSessionHost = (props: FixationSessionHostProps) => {
   const [currentQuestionIdx, setCurrentQuestionIdx] = useState<number>(0);
   const [showAnswers, setShowAnswers] = useState<boolean>(false);
   const [isEndOfFixation, setIsEndOfFixation] = useState<boolean>(false);
-
-  const handleAllUsersJoined = () => {
-    setIsWaitingToStart(false);
-    setDoShowInstructions(true);
-  }
-
-  const handleSessionIsLive = () => {
-    // TODO: make users unable to join
-    setDoShowInstructions(false);
-    setIsSessionLive(true);
-    console.log("Session is live");
-  }
+  const fixationSession: FixationSession = useLocation().state.session;
+  const fixationSessionSettings: FixationSessionSettings = useLocation().state.sessionSettings;
+  const webSocket = useRef<WebSocket>(props.webSocket);
 
   useEffect(() => {
     getFixationPlayers(fixationSession.code)
@@ -79,7 +68,19 @@ const FixationSessionHost = (props: FixationSessionHostProps) => {
       console.log(currentFixationQuestionsAndAnswers)
       setCurrentFixationAnswers(knuthShuffle(currentFixationQuestionsAndAnswers[currentQuestionIdx].answers))
     }
-  }, [currentQuestionIdx, []])
+  }, [currentQuestionIdx, []]);
+
+  const handleAllUsersJoined = () => {
+    setIsWaitingToStart(false);
+    setDoShowInstructions(true);
+  }
+
+  const handleSessionIsLive = () => {
+    // TODO: make users unable to join
+    setDoShowInstructions(false);
+    setIsSessionLive(true);
+    console.log("Session is live");
+  }
 
   const handleUserJoined = (socketMessage: SocketEventReceived) => {
     console.log(socketMessage.data)
@@ -129,6 +130,14 @@ const FixationSessionHost = (props: FixationSessionHostProps) => {
 
   const revealAnswer = (doShow: boolean) => {
     setShowAnswers(doShow);
+  }
+
+  const getPlaylistOffset = (numberOfSongs: number) => {
+    return getRandomInt(0, numberOfSongs);
+  }
+  
+  const getSongPercentageDurationOffset = (min: number = 0, max: number = 60) => {
+    return getRandomInt(min, max);
   }
 
   if (isWaitingToStart) {
@@ -205,10 +214,7 @@ const FixationSessionHost = (props: FixationSessionHostProps) => {
     // TODO: mark FixationSession as deleted
     return (
       <div className={styles.FixationSessionHost} data-testid="FixationSessionHost">
-        This is the end of the session.
-
-        TODO: Show standings.
-        TODO: Get stats.
+        <FixationSessionEnd/>
       </div>
     )
   }
@@ -216,7 +222,11 @@ const FixationSessionHost = (props: FixationSessionHostProps) => {
   if (playlistId != "") {
     return (
       <div className={styles.FixationSessionHost} data-testid="FixationSessionHost">
-        <MusicPlayer spotifyUri={`spotify:playlist:${playlistId}`}/>
+        <MusicPlayer
+          spotifyUri={`spotify:playlist:${playlistId}`}
+          songOffset={currentFixation?.spotifyRandomStartInd ? getSongPercentageDurationOffset() : 0}
+          playlistOffset={currentFixation?.keepShuffled ? getPlaylistOffset(currentFixation.questionCount) : 0}
+        />
       </div>
     );
   }

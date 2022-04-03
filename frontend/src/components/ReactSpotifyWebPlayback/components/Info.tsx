@@ -17,6 +17,8 @@ interface Props {
   token: string;
   track: SpotifyPlayerTrack;
   updateSavedStatus?: (fn: (status: boolean) => any) => any;
+  timeRemainingMs: number;
+  timeLimit?: number; //TODO
 }
 
 interface State {
@@ -94,7 +96,6 @@ export default class Info extends React.PureComponent<Props, State> {
 
   private setImage = () => {
     let image = document.getElementById('album-image') as HTMLImageElement;
-    console.log("img set", image)
     if (image) {
       this.updateState({ albumImage: image })
     }
@@ -111,19 +112,21 @@ export default class Info extends React.PureComponent<Props, State> {
     if (isActive) {
       classes.push(styles.mediaPlayer);
     }
-
+    const artistNames = artists ? artists?.map(d => d.name).join(', ') : "";
     return (
       <div className={styles.mediaPlayer}>
         {image && (
-          <AlbumCoverHolder id="album-image" alt={name} src={image} timeLimit={30}/>
+          <AlbumCoverHolder id="album-image" alt={name} src={image} timeLimit={30} timeRemaining={this.props.timeRemainingMs}/>
         )}
         {!!name && (
           <div>
-            <SongInfoReveal variant='h6' name={name} timeLimit={30} revealPace={1200}/>
+            <SongInfoReveal variant='h5' name={name} timeLimit={30} revealPace={Math.floor(this.props.timeRemainingMs / name.length)}/>
+            <span style={{fontSize: "1em"}}>Song Title</span>
             {/* <Typography variant='h6'>
               {name}
             </Typography> */}
-            <SongInfoReveal variant='body1' name={artists.map(d => d.name).join(', ')} timeLimit={30} revealPace={2000}/>
+            <SongInfoReveal variant='h6' name={artistNames} timeLimit={30} revealPace={Math.floor(this.props.timeRemainingMs / artistNames.length)}/>
+            <span>Artist/Composer</span>
           </div>
         )}
       </div>

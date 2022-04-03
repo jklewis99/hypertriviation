@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import styles from './FixationList.module.scss';
-import { TextField, Button, Grid, Typography, Box } from "@mui/material";
+import { TextField, Button, Grid, Typography, Box, Divider } from "@mui/material";
 import { Link } from "react-router-dom";
 import FixationCard from '../FixationCard/FixationCard';
 import { getAllFixations } from '../../services/fixation.service';
@@ -39,20 +39,21 @@ const FixationList = () => {
 
   return (
     <div className={styles.StartSession} data-testid="StartSession">
-      <Grid container spacing={4} alignItems="center" justifyContent="center">
+      <Box style={{height: "90vh", display: "flex", flexDirection: "column", overflow: "none"}}>
         <Typography variant="h3" color="inherit" style={{ width: '100%' }} noWrap>
           Choose a Trivia Session
         </Typography>
-        <Grid container alignItems="center" justifyContent="center">
+        <Divider/>
+        <Box style={{overflowY: "scroll", overflowX: "visible", flex: "1",  width: "100%"}}>
           {
             isLoading
               ?
               <Loader />
               :
-              <Grid container spacing={2}>
+              <Grid container spacing={2} >
                 {
                   fixations.map((fixation: Fixation, i: number) => (
-                    <Grid item xs={i % 2 === 0 ? 8 : 4}>
+                    <Grid item xs={(i % 4) % 3 === 0 ? 8 : 4}>
                       <FixationCard
                       fixation={fixation}
                         key={Math.floor(Date.now() + i)}
@@ -62,14 +63,14 @@ const FixationList = () => {
                 }
               </Grid>
           }
-        </Grid>
+        </Box>
 
-        <Grid item xs={12}>
+        <Box style={{padding: "5px"}}>
           <Button variant="contained" color="secondary" to="/" component={Link}>
             Back
           </Button>
-        </Grid>
-      </Grid>
+        </Box>
+      </Box>
     </div>
   );
 }

@@ -1,1 +1,7 @@
-.FixationCreate {}
+.FixationCreate {
+    .playlistContainer {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+    }
+}
