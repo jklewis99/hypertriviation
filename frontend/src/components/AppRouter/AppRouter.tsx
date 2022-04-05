@@ -32,12 +32,12 @@ const AppRouter = () => {
   const webSocket = new WebSocket(webSocketConnectionString)
 
   const connectWebSocket = () => {
-    webSocket.onopen = (event) => console.log("WebSocket connected!");
+    webSocket.onopen = (event) => console.log("WebSocket connected!", event);
     webSocket.onmessage = (event) => console.log("EVENT DATA: ", event.data);
     webSocket.onclose = (event) => {
       console.log(
         `WebSocket is closed. Reconnect will be attempted in 1 second.`,
-        event.reason
+        event
       );
       setTimeout(() => {
         connectWebSocket();

@@ -14,14 +14,14 @@ interface FixationSessionAnswerProps {
   revealAnswers: boolean;
   isMultipleChoice: boolean;
   isPlayer?: boolean;
-  submitAnswerCallback?: (answerId: number) => void;
+  submitAnswerCallback?: (answerId: number, answerTxt: string) => void;
 }
 
 const FixationSessionAnswer: FC<FixationSessionAnswerProps> = (props) => {
 
-  const handleAnswerClick = (answerId: number) => {
+  const handleAnswerClick = (answerId: number, answerTxt: string) => {
     if (props.submitAnswerCallback) {
-      props.submitAnswerCallback(answerId);
+      props.submitAnswerCallback(answerId, answerTxt);
     }
 
   }
@@ -72,7 +72,7 @@ const FixationSessionAnswer: FC<FixationSessionAnswerProps> = (props) => {
                               ? (!answer.correctAnswerInd ? styles.wrongAnswerCard : styles.correctAnswerCard) : ''}
                             ${props.isPlayer ? styles.clickable : ''}`}
                 style={props.revealAnswers && !answer.correctAnswerInd ? {} : answerOptionsStyles[i]}
-                onClick={() => handleAnswerClick(answer.id)}
+                onClick={() => handleAnswerClick(answer.id, answer.answerTxt)}
               >
                 <CardContent>
                   {answerIcons[i]}
