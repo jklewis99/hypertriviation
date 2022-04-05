@@ -100,17 +100,19 @@ TEMPLATES = [
     },
 ]
 
+STREAM_SOCKET_GROUP_NAME = 'system_detail'
 # WSGI_APPLICATION = 'backend.wsgi.application'
 ASGI_APPLICATION = "backend.asgi.application"
 
-# CHANNEL_LAYERS = {
-#   "default": {
-#     "BACKEND": "channels_redis.core.RedisChannelLayer",
-#     "CONFIG": {
-#       "hosts": [("127.0.0.1", 8000)],
-#     },
-#   },
-# }
+CHANNEL_LAYERS = {
+    "default": {
+       "BACKEND": "channels.layers.InMemoryChannelLayer"
+        # "BACKEND": "channels_redis.core.RedisChannelLayer",
+        # "CONFIG": {
+        #   "hosts": [("127.0.0.1", 8000)],
+        # },
+    },
+}
 
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases

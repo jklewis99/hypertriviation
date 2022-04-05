@@ -24,6 +24,7 @@ export function randomUniqueNumberList(range: number, outputCount?: number) {
  * @returns 
  */
 export function knuthShuffle(array: any[]) {
+  console.log("hello")
   let currentIndex = array.length;
   let randomIndex: number;
 

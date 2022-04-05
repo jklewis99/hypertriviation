@@ -1,39 +1,35 @@
 import { display } from '@mui/system';
 import React, { FC, useEffect, useRef, useState } from 'react';
 import { FixationAnswer } from '../../interfaces/FixationAnswer';
+import { QuestionAnsweredEvent } from '../../interfaces/websockets/SocketEvents';
 import { getFixationQuestionAnswers } from '../../services/fixation.service';
 import FixationSessionAnswer from '../FixationSessionAnswer/FixationSessionAnswer';
 import styles from './FixationPlayerQuestion.module.scss';
 
 interface FixationPlayerQuestionProps {
   displayName: string;
+  roomCode: string;
   questionId: number;
   questionTxt: string;
+  answers: FixationAnswer[];
   webSocket: WebSocket;
 }
 
 const FixationPlayerQuestion: FC<FixationPlayerQuestionProps> = (props) => {
-  const [answers, setAnswers] = useState<FixationAnswer[]>([]);
   const webSocket = useRef<WebSocket>(props.webSocket);
-  
-  useEffect(() => {
-    getFixationQuestionAnswers(props.questionId)
-      .then((response) => {
-        setAnswers(response);
-      })
-      .catch((error: Error) => {
-        console.log(error.message);
-      })
-  }, [props.questionId]);
 
-  const submitAnswer = (answerId: number) => {
+  const submitAnswer = (answerId: number, answerTxt: string) => {
     // TODO: update to SubmitAnswer event type
     console.log(answerId);
-    let message: any = {
-      model: "answered",
+    let message: QuestionAnsweredEvent = {
+      model: "answer",
       payload: {
         display_name: props.displayName,
-        answer_id: answerId
+        player_session_id: "abcd",
+        room_code: props.roomCode,
+        question_id: props.questionId,
+        answer_id: answerId,
+        answer_txt: answerTxt
       }
     };
     webSocket.current.send(JSON.stringify(message));
@@ -41,7 +37,9 @@ const FixationPlayerQuestion: FC<FixationPlayerQuestionProps> = (props) => {
 
   return (
     <div className={styles.FixationPlayerQuestion} data-testid="FixationPlayerQuestion">
-      <FixationSessionAnswer answers={answers} isMultipleChoice={true} revealAnswers={false} isPlayer={true} submitAnswerCallback={submitAnswer}/>
+      {/* TODO: Update Settings */}
+      {props.questionTxt}
+      <FixationSessionAnswer answers={props.answers} isMultipleChoice={true} revealAnswers={false} isPlayer={true} submitAnswerCallback={submitAnswer}/>
     </div>
   );
 }

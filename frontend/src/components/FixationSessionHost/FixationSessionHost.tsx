@@ -6,7 +6,7 @@ import FixationSessionStart from '../FixationSessionStart/FixationSessionStart';
 import { FixationSessionHostProps } from '../../interfaces/props/FixationSessionHost.props';
 import { getFixation, getFixationPlayers, getFixationQuestion, getFixationQuestionAnswers, getFixationQuestionsAndAnswers } from '../../services/fixation.service';
 import { FixationSessionPlayer } from '../../interfaces/FixationSessionPlayer';
-import { JoinRoomReceivedEventPayload, SocketEventReceived } from '../../interfaces/websockets/SocketEvents';
+import { JoinSessionReceivedEventPayload, SessionQuestionChangedEvent, SessionStartedEvent, SocketEventReceived } from '../../interfaces/websockets/SocketEvents';
 import { Card, CardContent, Grid, Typography } from '@mui/material';
 import FixationSessionInstructions from '../FixationSessionInstructions/FixationSessionInstructions';
 import MusicPlayer from '../MusicPlayer/MusicPlayer';
@@ -37,7 +37,7 @@ const FixationSessionHost = (props: FixationSessionHostProps) => {
   const [isEndOfFixation, setIsEndOfFixation] = useState<boolean>(false);
   const fixationSession: FixationSession = useLocation().state.session;
   const fixationSessionSettings: FixationSessionSettings = useLocation().state.sessionSettings;
-  const webSocket = useRef<WebSocket>(props.webSocket);
+  const webSocket = useRef<WebSocket>(props.webSocket).current;
 
   useEffect(() => {
     getFixationPlayers(fixationSession.code)
@@ -58,34 +58,29 @@ const FixationSessionHost = (props: FixationSessionHostProps) => {
   }, []);
 
   useEffect(() => {
-    webSocket.current.onmessage = (event) => {
+    webSocket.onmessage = (event) => {
       handleUserJoined(JSON.parse(event.data))
     }
   });
 
-  useEffect(() => {
-    if (currentFixationQuestionsAndAnswers && currentFixationQuestionsAndAnswers.length > currentQuestionIdx) {
-      console.log(currentFixationQuestionsAndAnswers)
-      setCurrentFixationAnswers(knuthShuffle(currentFixationQuestionsAndAnswers[currentQuestionIdx].answers))
-    }
-  }, [currentQuestionIdx, []]);
-
   const handleAllUsersJoined = () => {
     setIsWaitingToStart(false);
     setDoShowInstructions(true);
+    sendSessionStartedEvent();
   }
 
   const handleSessionIsLive = () => {
     // TODO: make users unable to join
     setDoShowInstructions(false);
     setIsSessionLive(true);
+    setAnswersAndSendSocketEvent(currentQuestionIdx);
     console.log("Session is live");
   }
 
   const handleUserJoined = (socketMessage: SocketEventReceived) => {
     console.log(socketMessage.data)
     if (socketMessage.success) {
-      let user = socketMessage.data as JoinRoomReceivedEventPayload;
+      let user = socketMessage.data as JoinSessionReceivedEventPayload;
       if (user !== undefined) {
         let player: FixationSessionPlayer = {
           fixationSession: user.fixation_session,
@@ -117,7 +112,17 @@ const FixationSessionHost = (props: FixationSessionHostProps) => {
       return;
     }
     revealAnswer(false);
-    setCurrentQuestionIdx(currentQuestionIdx + change);
+    let questionIdx = currentQuestionIdx + change;
+    setAnswersAndSendSocketEvent(questionIdx);
+    setCurrentQuestionIdx(questionIdx);
+  }
+
+  const setAnswersAndSendSocketEvent = (questionIdx: number) => {
+    if (currentFixationQuestionsAndAnswers) {
+      let answers = knuthShuffle(currentFixationQuestionsAndAnswers[questionIdx].answers)
+      setCurrentFixationAnswers(answers);
+      sendSessionQuestionChangeEvent(questionIdx, currentFixationQuestionsAndAnswers[questionIdx].question, answers )
+    }
   }
 
   const terminateQuestion = (answerSubmitted: boolean = false) => {
@@ -138,6 +143,38 @@ const FixationSessionHost = (props: FixationSessionHostProps) => {
   
   const getSongPercentageDurationOffset = (min: number = 0, max: number = 60) => {
     return getRandomInt(min, max);
+  }
+
+  const sendSessionStartedEvent = () => {
+    let message: SessionStartedEvent = {
+      model: "session_started",
+      payload: {
+        fixation_id: fixationSession.fixationId,
+        room_code: fixationSession.code,
+        session_started: true
+      }
+    };
+    console.log(message);
+    webSocket.send(JSON.stringify({
+      message
+    }));
+  }
+
+  const sendSessionQuestionChangeEvent = (idx: number, question: FixationQuestion, answers: FixationAnswer[]) => {
+    let message: SessionQuestionChangedEvent = {
+      model: "session_question_change",
+      payload: {
+        fixation_id: fixationSession.fixationId,
+        room_code: fixationSession.code,
+        question_txt: question.questionTxt,
+        question_idx: idx,
+        answers: answers
+      }
+    };
+    console.log(message);
+    webSocket.send(JSON.stringify({
+      message
+    }));
   }
 
   if (isWaitingToStart) {
