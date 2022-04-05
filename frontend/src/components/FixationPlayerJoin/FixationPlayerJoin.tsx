@@ -1,15 +1,15 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { Button, Card, CardActions, CardContent, CardHeader, TextField } from '@mui/material';
 import { PlayerFixationJoinProps } from '../../interfaces/props/PlayerFixationJoin.props';
 import styles from './FixationPlayerJoin.module.scss';
-import { JoinRoomEvent } from '../../interfaces/websockets/SocketEvents';
+import { JoinSessionEvent } from '../../interfaces/websockets/SocketEvents';
 
 const FixationPlayerJoin = (props: PlayerFixationJoinProps) => {
   const [roomCode, setRoomCode] = useState<string>("");
   const [displayName, setDisplayName] = useState<string>("");
   const maxDisplayNameLength = 16;
   const roomCodeLength = 8;
-  const webSocket = props.webSocket;
+  const webSocket = useRef<WebSocket>(props.webSocket).current;
   const readCode = (event: any) => {
     setRoomCode(event.target.value);
   }
@@ -17,12 +17,12 @@ const FixationPlayerJoin = (props: PlayerFixationJoinProps) => {
     setDisplayName(event.target.value);
   }
 
-  const joinRoom = () => {
+  const joinSession = () => {
     if (roomCode.length !== roomCodeLength
       || displayName.length > maxDisplayNameLength
       || displayName.length === 0) return;
     
-    let message: JoinRoomEvent = {
+    let message: JoinSessionEvent = {
       model: "joined",
       payload: {
         display_name: displayName,
@@ -33,7 +33,7 @@ const FixationPlayerJoin = (props: PlayerFixationJoinProps) => {
     webSocket.send(JSON.stringify({
       message
     }));
-    props.setJoinedCallback(displayName);
+    props.setJoinedCallback(displayName, roomCode);
   }
 
   return (
@@ -61,7 +61,7 @@ const FixationPlayerJoin = (props: PlayerFixationJoinProps) => {
             size="medium"
             variant="contained"
             color="secondary"
-            onClick={joinRoom}
+            onClick={joinSession}
             disabled={displayName.length > maxDisplayNameLength || displayName.length === 0 || roomCode.length !== roomCodeLength}
           >Join</Button>
         </CardActions>
