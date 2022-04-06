@@ -2,8 +2,14 @@ import React, { useEffect, useRef, useState } from 'react';
 import { FixationAnswer } from '../../interfaces/FixationAnswer';
 import { FixationQuestion } from '../../interfaces/FixationQuestion';
 import { PlayerFixationProps } from '../../interfaces/props/PlayerFixation.props';
-import { SocketEventReceived, SessionQuestionChangedEventPayload, QuestionAnsweredSendEventPayload, SessionStartedEventPayload } from '../../interfaces/websockets/SocketEvents';
-import { isSessionQuestionChangedEventPayload, isSessionStartedEventPayload } from '../../interfaces/websockets/socketUtils';
+import { SocketEventReceived,
+  SessionQuestionChangedEventPayload,
+  QuestionAnsweredSendEventPayload,
+  SessionStartedEventPayload,
+  SessionQuestionChangedEvent,
+  SessionQuestionRevealAnswersEventPayload, 
+  SessionSongChangedEventPayload} from '../../interfaces/websockets/SocketEvents';
+import { socketEventNames } from '../../interfaces/websockets/socketUtils';
 import FixationPlayerJoin from '../FixationPlayerJoin/FixationPlayerJoin';
 import FixationPlayerQuestion from '../FixationPlayerQuestion/FixationPlayerQuestion';
 import styles from './FixationPlayer.module.scss';
@@ -12,6 +18,10 @@ interface QuestionForPlayer {
   questionId: number;
   questionTxt: string;
 }
+interface SongForPlayer {
+  songName: string;
+  artistName: string;
+}
 
 const FixationPlayer = (props: PlayerFixationProps) => {
   const [inFixationSession, setInFixationSession] = useState<boolean>(false);
@@ -19,7 +29,10 @@ const FixationPlayer = (props: PlayerFixationProps) => {
   const [roomCode, setRoomCode] = useState<string>();
   const [isFixationSessionActive, setIsFixationSessionActive] = useState<boolean>(false);
   const [currentQuestion, setCurrentQuestion] = useState<QuestionForPlayer>();
+  const [currentSong, setCurrentSong] = useState<SongForPlayer>();
   const [currentAnswers, setCurrentAnswers] = useState<FixationAnswer[]>([]);
+  const [multipleChoiceInd, setMultipleChoiceInd] = useState<boolean>(false);
+  const [revealAnswersInd, setRevealAnswersInd] = useState<boolean>(false);
   const webSocket = useRef<WebSocket>(props.webSocket).current;
   
   useEffect(() => {
@@ -30,18 +43,41 @@ const FixationPlayer = (props: PlayerFixationProps) => {
   });
 
   const handleSocketEvent = (socketMessage: SocketEventReceived) => {
-    console.log(socketMessage.data)
+    console.log(socketMessage.data);
     if (socketMessage.success) {
       let payload = socketMessage.data;
-      if (isSessionStartedEventPayload(payload)) {
+      if (socketMessage.event === socketEventNames.SESSION_STARTED) {
+        payload = payload as SessionStartedEventPayload;
         setIsFixationSessionActive(payload.session_started);
+        setMultipleChoiceInd(payload.multiple_choice_ind);
       }
-      else if (isSessionQuestionChangedEventPayload(payload)) {
-        setCurrentQuestion({
-          questionId: payload.question_idx,
-          questionTxt: payload.question_txt
-        });
-        setCurrentAnswers(payload.answers);
+      else if (socketMessage.event === socketEventNames.SESSION_QUESTION_CHANGE) {
+        debugger;
+        payload = payload as SessionQuestionChangedEventPayload;
+        if (payload.room_code === roomCode) {
+          setCurrentQuestion({
+            questionId: payload.question_idx,
+            questionTxt: payload.question_txt
+          });
+          setCurrentAnswers(payload.answers);
+          setRevealAnswersInd(false);
+        }
+      }
+      else if (socketMessage.event === socketEventNames.SESSION_SONG_CHANGE) {
+        payload = payload as SessionSongChangedEventPayload;
+        if (payload.room_code === roomCode) {
+          setCurrentSong({
+            songName: payload.song_name,
+            artistName: payload.artist_name
+          });
+          setRevealAnswersInd(false);
+        }
+      }
+      else if (socketMessage.event === socketEventNames.SESSION_QUESTION_REVEAL_ANSWER) {
+        payload = payload as SessionQuestionRevealAnswersEventPayload;
+        if (payload.room_code === roomCode) {
+          setRevealAnswersInd(payload.do_reveal);
+        }
       }
       else {
         // TODO: handle users joining and set usernames to list so we know what usernames are taken
@@ -81,12 +117,23 @@ const FixationPlayer = (props: PlayerFixationProps) => {
             questionId={currentQuestion.questionId}
             questionTxt={currentQuestion.questionTxt}
             answers={currentAnswers}
+            multipleChoiceInd={multipleChoiceInd}
+            revealAnswersInd={revealAnswersInd}
             webSocket={webSocket}
           />
           :
-          <div className={styles.mainContent}>
-            Get ready...
-          </div>
+          (
+            currentSong && roomCode && displayName
+            ?
+            <div className={styles.mainContent} style={{flexDirection: "column"}}>
+              {/* TODO make this something interesting */}
+              <i>{currentSong.songName}</i> by <b>{currentSong.artistName}</b>
+            </div>
+            :
+            <div className={styles.mainContent}>
+              Get ready...
+            </div>
+          )
         )
         :
         <div className={styles.mainContent}>

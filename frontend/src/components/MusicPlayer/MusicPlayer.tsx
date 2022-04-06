@@ -41,6 +41,7 @@ const MusicPlayer = (props: MusicPlayerProps) => {
       artist: artistList
     })
     setDeviceId(state.deviceId);
+    props.goToNextSong(state.track.name, artistList);
   }
 
   const setButtons = () => {

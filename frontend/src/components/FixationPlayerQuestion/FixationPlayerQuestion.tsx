@@ -12,6 +12,8 @@ interface FixationPlayerQuestionProps {
   questionId: number;
   questionTxt: string;
   answers: FixationAnswer[];
+  multipleChoiceInd: boolean;
+  revealAnswersInd: boolean;
   webSocket: WebSocket;
 }
 
@@ -39,7 +41,13 @@ const FixationPlayerQuestion: FC<FixationPlayerQuestionProps> = (props) => {
     <div className={styles.FixationPlayerQuestion} data-testid="FixationPlayerQuestion">
       {/* TODO: Update Settings */}
       {props.questionTxt}
-      <FixationSessionAnswer answers={props.answers} isMultipleChoice={true} revealAnswers={false} isPlayer={true} submitAnswerCallback={submitAnswer}/>
+      <FixationSessionAnswer
+        answers={props.answers}
+        isMultipleChoice={props.multipleChoiceInd}
+        revealAnswers={props.revealAnswersInd}
+        isPlayer={true}
+        submitAnswerCallback={submitAnswer}
+      />
     </div>
   );
 }

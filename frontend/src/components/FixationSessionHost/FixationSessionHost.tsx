@@ -6,7 +6,7 @@ import FixationSessionStart from '../FixationSessionStart/FixationSessionStart';
 import { FixationSessionHostProps } from '../../interfaces/props/FixationSessionHost.props';
 import { getFixation, getFixationPlayers, getFixationQuestion, getFixationQuestionAnswers, getFixationQuestionsAndAnswers } from '../../services/fixation.service';
 import { FixationSessionPlayer } from '../../interfaces/FixationSessionPlayer';
-import { JoinSessionReceivedEventPayload, SessionQuestionChangedEvent, SessionStartedEvent, SocketEventReceived } from '../../interfaces/websockets/SocketEvents';
+import { JoinSessionReceivedEventPayload, SessionQuestionChangedEvent, SessionQuestionRevealAnswersEvent, SessionSongChangedEvent, SessionStartedEvent, SocketEventReceived } from '../../interfaces/websockets/SocketEvents';
 import { Card, CardContent, Grid, Typography } from '@mui/material';
 import FixationSessionInstructions from '../FixationSessionInstructions/FixationSessionInstructions';
 import MusicPlayer from '../MusicPlayer/MusicPlayer';
@@ -20,6 +20,7 @@ import { FixationQuestionAndAnswers } from '../../interfaces/FixationQuestionsAn
 import CountdownTimer from '../CountdownTimer/CountdownTimer';
 import FixationSessionAnswer from '../FixationSessionAnswer/FixationSessionAnswer';
 import FixationSessionEnd from '../FixationSessionEnd/FixationSessionEnd';
+import { socketEventNames } from '../../interfaces/websockets/socketUtils';
 
 const FixationSessionHost = (props: FixationSessionHostProps) => {
   const [errorMessage, setErrorMessage] = useState<string>("");
@@ -73,21 +74,28 @@ const FixationSessionHost = (props: FixationSessionHostProps) => {
     // TODO: make users unable to join
     setDoShowInstructions(false);
     setIsSessionLive(true);
-    setAnswersAndSendSocketEvent(currentQuestionIdx);
+    if (currentFixation && !currentFixation.spotifyPlaylistId) {
+      setAnswersAndSendSocketEvent(currentQuestionIdx);
+    }
     console.log("Session is live");
   }
 
   const handleUserJoined = (socketMessage: SocketEventReceived) => {
     console.log(socketMessage.data)
     if (socketMessage.success) {
-      let user = socketMessage.data as JoinSessionReceivedEventPayload;
-      if (user !== undefined) {
+      let payload = socketMessage.data;
+      if (socketMessage.event === socketEventNames.SESSION_JOIN) {
+        payload = payload as JoinSessionReceivedEventPayload;
         let player: FixationSessionPlayer = {
-          fixationSession: user.fixation_session,
-          playerSessionId: user.player_session_id,
-          displayName: user.display_name
+          fixationSession: payload.fixation_session,
+          playerSessionId: payload.player_session_id,
+          displayName: payload.display_name
         }
         setJoinedUsers([...joinedUsers, player]);
+      }
+      else {
+        // TODO: handle more socket events
+        return;
       }
     }
     else {
@@ -130,7 +138,14 @@ const FixationSessionHost = (props: FixationSessionHostProps) => {
       // TODO handle some logic when socket stuff happens
       return;
     }
-    revealAnswer(true);
+    if (currentFixationQuestionsAndAnswers) {
+      sendSessionQuestionRevealAnswersEvent(currentQuestionIdx, currentFixationQuestionsAndAnswers[currentQuestionIdx].question);
+    }
+    revealAnswer(true); // todo: handle boolean with settings
+  }
+
+  const changeSong = (songName: string, artistName: string) => {
+    sendSessionSongChangeEvent(songName, artistName);
   }
 
   const revealAnswer = (doShow: boolean) => {
@@ -151,7 +166,8 @@ const FixationSessionHost = (props: FixationSessionHostProps) => {
       payload: {
         fixation_id: fixationSession.fixationId,
         room_code: fixationSession.code,
-        session_started: true
+        session_started: true,
+        multiple_choice_ind: fixationSessionSettings.multipleChoiceInd
       }
     };
     console.log(message);
@@ -169,6 +185,39 @@ const FixationSessionHost = (props: FixationSessionHostProps) => {
         question_txt: question.questionTxt,
         question_idx: idx,
         answers: answers
+      }
+    };
+    console.log(message);
+    webSocket.send(JSON.stringify({
+      message
+    }));
+  }
+
+  const sendSessionSongChangeEvent = (songName: string, artistName: string) => {
+    let message: SessionSongChangedEvent = {
+      model: "session_song_change",
+      payload: {
+        fixation_id: fixationSession.fixationId,
+        room_code: fixationSession.code,
+        song_name: songName,
+        artist_name: artistName
+      }
+    };
+    console.log(message);
+    webSocket.send(JSON.stringify({
+      message
+    }));
+  }
+
+  const sendSessionQuestionRevealAnswersEvent = (idx: number, question: FixationQuestion) => {
+    let message: SessionQuestionRevealAnswersEvent = {
+      model: "session_question_reveal_answer",
+      payload: {
+        fixation_id: fixationSession.fixationId,
+        room_code: fixationSession.code,
+        question_txt: question.questionTxt,
+        question_idx: idx,
+        do_reveal: true // change to a setting
       }
     };
     console.log(message);
@@ -263,6 +312,7 @@ const FixationSessionHost = (props: FixationSessionHostProps) => {
           spotifyUri={`spotify:playlist:${playlistId}`}
           songOffset={currentFixation?.spotifyRandomStartInd ? getSongPercentageDurationOffset() : 0}
           playlistOffset={currentFixation?.keepShuffled ? getPlaylistOffset(currentFixation.questionCount) : 0}
+          goToNextSong={changeSong}
         />
       </div>
     );
@@ -271,7 +321,17 @@ const FixationSessionHost = (props: FixationSessionHostProps) => {
   if (currentFixation && !currentFixation.spotifyPlaylistId && currentFixationQuestionsAndAnswers) {
     return (
       <div className={styles.FixationSessionHost} data-testid="FixationSessionHost">
-        <CountdownTimer key={currentQuestionIdx} secondsRemaining={fixationSessionSettings.timeLimit} stopTimerCallback={terminateQuestion}/>
+        {
+          !showAnswers
+          ?
+          <CountdownTimer
+            key={currentQuestionIdx}
+            secondsRemaining={fixationSessionSettings.timeLimit}
+            stopTimerCallback={terminateQuestion}
+          />
+          :
+          "0 sec"
+        }
         <FixationSessionQuestion
           question={currentFixationQuestionsAndAnswers[currentQuestionIdx].question}
           questionIdx={currentQuestionIdx + 1}

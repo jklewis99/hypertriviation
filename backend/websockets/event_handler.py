@@ -8,6 +8,8 @@ class EventTypes():
     ANSWER_QUESTION = "answer"
     SESSION_STARTED = "session_started"
     SESSION_QUESTION_CHANGE = "session_question_change"
+    SESSION_SONG_CHANGE = "session_song_change"
+    SESSION_QUESTION_REVEAL_ANSWER = "session_question_reveal_answer"
 
 
 def handle_event(event: dict):
@@ -40,8 +42,12 @@ def handle_event(event: dict):
         return handle_session_started(payload)
     elif (model == EventTypes.SESSION_QUESTION_CHANGE):
         return handle_session_question_changed(payload)
+    elif (model == EventTypes.SESSION_SONG_CHANGE):
+        return handle_session_question_changed(payload)
     elif (model == EventTypes.ANSWER_QUESTION):
         return handle_answer_question(payload)
+    elif (model == EventTypes.SESSION_QUESTION_REVEAL_ANSWER):
+        return handle_session_question_reveal_answers(payload)
     
     return (False, "Unsupported event type", None)
 
@@ -132,6 +138,7 @@ def handle_session_started(payload: dict):
     fixation_id = None
     room_code = None
     session_started = None
+    multiple_choice_ind = None
 
     if "fixation_id" in payload:
         fixation_id = payload["fixation_id"]
@@ -139,6 +146,8 @@ def handle_session_started(payload: dict):
         room_code = payload["room_code"]
     if "session_started" in payload:
         session_started = payload["session_started"]
+    if "multiple_choice_ind" in payload:
+        multiple_choice_ind = payload["multiple_choice_ind"]
     
     # TODO: set fixation session to active
     # with ThreadPoolExecutor() as executor:
@@ -183,3 +192,73 @@ def handle_session_question_changed(payload: dict):
     #     return thread.result()
     return (True, f"{room_code}: next question to {question_idx}", payload)
 
+def handle_session_song_changed(payload: dict):
+    """
+    move to next song
+
+    Parameters
+    ==========
+    `payload`
+        contains keys `fixation_id`, `room_code`, `song_name`, `artist_name`
+        
+    Returns
+    =========
+    (success: bool, message: str, player_payload: dict)
+    """
+    fixation_id = None
+    room_code = None
+    song_name = None
+    artist_name = None
+
+    if "fixation_id" in payload:
+        fixation_id = payload["fixation_id"]
+    if "room_code" in payload:
+        room_code = payload["room_code"]
+    if "song_name" in payload:
+        song_name = payload["song_name"]
+    if "artist_name" in payload:
+        artist_name = payload["artist_name"]
+    
+    
+    # TODO: set fixation session to active
+    # with ThreadPoolExecutor() as executor:
+    #     thread = executor.submit(join_room, fixation_id, room_code, player_session_id)
+    #     return thread.result()
+    return (True, f"{room_code}: next song to {song_name}", payload)
+
+def handle_session_question_reveal_answers(payload: dict):
+    """
+    show answers (if show is true)
+
+    Parameters
+    ==========
+    `payload`
+        contains keys `fixation_id`, `room_code`, `question_txt`, `question_idx`, `reveal`
+        
+    Returns
+    =========
+    (success: bool, message: str, player_payload: dict)
+    """
+    fixation_id = None
+    room_code = None
+    question_txt = None
+    question_idx = None
+    do_reveal = None
+
+    if "fixation_id" in payload:
+        fixation_id = payload["fixation_id"]
+    if "room_code" in payload:
+        room_code = payload["room_code"]
+    if "question_txt" in payload:
+        question_txt = payload["question_txt"]
+    if "question_idx" in payload:
+        question_idx = payload["question_idx"]
+    if "do_reveal" in payload:
+        do_reveal = payload["do_reveal"]
+    
+    
+    # TODO: set fixation session to active
+    # with ThreadPoolExecutor() as executor:
+    #     thread = executor.submit(join_room, fixation_id, room_code, player_session_id)
+    #     return thread.result()
+    return (True, f"{room_code}: time to end question {question_idx}", payload)
