@@ -1,10 +1,14 @@
 import ClickAwayListener from '@mui/base/ClickAwayListener';
 import { Button, Card, CardActions } from '@mui/material';
 import React from 'react';
-import { FixationSessionSettingsProps } from '../../interfaces/props/FixationSessionSettings.props';
 import FixationSettings from '../FixationSettings/FixationSettings';
 import { SetFixationSessionSettings } from '../../interfaces/payloads/SetFixationSessionSettings.payload';
 import styles from './FixationSessionSettings.module.scss';
+
+interface FixationSessionSettingsProps {
+  closeModalCallback: () => void;
+  startFixationCallback: (settings: SetFixationSessionSettings) => void;
+}
 
 const FixationSessionSettings = (props: FixationSessionSettingsProps) => {
   const [state, setState] = React.useState({

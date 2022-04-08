@@ -7,6 +7,7 @@ class EventTypes():
     SESSION_JOIN = "joined"
     ANSWER_QUESTION = "answer"
     SESSION_STARTED = "session_started"
+    SESSION_OPENED = "session_opened"
     SESSION_QUESTION_CHANGE = "session_question_change"
     SESSION_SONG_CHANGE = "session_song_change"
     SESSION_QUESTION_REVEAL_ANSWER = "session_question_reveal_answer"
@@ -23,33 +24,62 @@ def handle_event(event: dict):
 
     Returns
     =========
-    (success: bool, message: str, payload_to_emit: dict)
+    (success: bool, message: str, payload_to_emit: dict, group: str)
     """
     model = None
     payload = None
-    print(event)
     if "model" in event:
         model = event["model"]
     if "payload" in event:
         payload = event["payload"]
+    if "group" in event:
+        group = event["group"]
+    else:
+        group = None
     
     # fake case statement
-    print(EventTypes.SESSION_JOIN)
-    print(model)
-    if (model == EventTypes.SESSION_JOIN):
-        return handle_join_session(payload)
+    if (model == EventTypes.SESSION_OPENED):
+        return (*handle_session_opened(payload), group)
+    elif (model == EventTypes.SESSION_JOIN):
+        return (*handle_join_session(payload), group)
     elif (model == EventTypes.SESSION_STARTED):
-        return handle_session_started(payload)
+        return (*handle_session_started(payload), group)
     elif (model == EventTypes.SESSION_QUESTION_CHANGE):
-        return handle_session_question_changed(payload)
+        return (*handle_session_question_changed(payload), group)
     elif (model == EventTypes.SESSION_SONG_CHANGE):
-        return handle_session_question_changed(payload)
+        return (*handle_session_question_changed(payload), group)
     elif (model == EventTypes.ANSWER_QUESTION):
-        return handle_answer_question(payload)
+        return (*handle_answer_question(payload), group)
     elif (model == EventTypes.SESSION_QUESTION_REVEAL_ANSWER):
-        return handle_session_question_reveal_answers(payload)
+        return (*handle_session_question_reveal_answers(payload), group)
     
-    return (False, "Unsupported event type", None)
+    return (False, "Unsupported event type", None, None)
+
+def handle_session_opened(payload: dict):
+    """
+    set session to active
+
+    Parameters
+    ==========
+    `payload`
+        contains keys `fixation_id`, `room_code`, and `host`
+        
+    Returns
+    =========
+    (success: bool, message: str, player_payload: dict)
+    """
+    fixation_id = None
+    room_code = None
+    host = None
+
+    if "fixation_id" in payload:
+        fixation_id = payload["fixation_id"]
+    if "room_code" in payload:
+        room_code = payload["room_code"]
+    if "multiple_choice_ind" in payload:
+        host = payload["host"]
+    
+    return (True, f"{room_code}: session opened", payload)
 
 def handle_join_session(payload: dict):
     """

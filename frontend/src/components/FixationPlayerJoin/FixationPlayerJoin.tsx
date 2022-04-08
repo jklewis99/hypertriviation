@@ -1,15 +1,18 @@
 import React, { useRef, useState } from 'react';
 import { Button, Card, CardActions, CardContent, CardHeader, TextField } from '@mui/material';
-import { PlayerFixationJoinProps } from '../../interfaces/props/PlayerFixationJoin.props';
 import styles from './FixationPlayerJoin.module.scss';
 import { JoinSessionEvent } from '../../interfaces/websockets/SocketEvents';
+import { handleInitialWebSocketConnection, sendSessionJoinedEvent } from '../../websockets/websockets';
+
+interface PlayerFixationJoinProps {
+  setJoinedCallback: (webSocket: WebSocket, displayName: string, roomCode: string) => void;
+}
 
 const FixationPlayerJoin = (props: PlayerFixationJoinProps) => {
   const [roomCode, setRoomCode] = useState<string>("");
   const [displayName, setDisplayName] = useState<string>("");
   const maxDisplayNameLength = 16;
   const roomCodeLength = 8;
-  const webSocket = useRef<WebSocket>(props.webSocket).current;
   const readCode = (event: any) => {
     setRoomCode(event.target.value);
   }
@@ -21,19 +24,9 @@ const FixationPlayerJoin = (props: PlayerFixationJoinProps) => {
     if (roomCode.length !== roomCodeLength
       || displayName.length > maxDisplayNameLength
       || displayName.length === 0) return;
-    
-    let message: JoinSessionEvent = {
-      model: "joined",
-      payload: {
-        display_name: displayName,
-        room_code: roomCode
-      }
-    };
-    console.log(message);
-    webSocket.send(JSON.stringify({
-      message
-    }));
-    props.setJoinedCallback(displayName, roomCode);
+    const newWebSocket = handleInitialWebSocketConnection(roomCode);
+    sendSessionJoinedEvent(newWebSocket, roomCode, displayName);
+    props.setJoinedCallback(newWebSocket, displayName, roomCode);
   }
 
   return (

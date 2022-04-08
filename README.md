@@ -1,10 +1,14 @@
 # Building Full-Stack _Hypertriviation_
 
 ## Running Locally
-
+Prerequisites:
+- Python (3.9.x)
+- Node (14.17.x)
+- Docker (20.10.x)
 
 ## Getting Started
 Ensure you have Python 3.9 installed. You can use pip or anaconda. You can download the latest version [here](https://www.python.org/downloads/).
+Also ensure you have Docker installed. You can download the latest version [for Windows](https://docs.docker.com/desktop/windows/install/)
 ### 1. Clone the repository
 Navigate to the folder in which you want to store this repository. Then clone the repository and change directory to the repository:
 ```
@@ -87,6 +91,12 @@ The backend is built in Python 3.9 with Django REST framework. Tables are struct
 
     ```
     conda activate myenv
+    ```
+
+2. Start the redis cache with Docker:
+
+    ```
+    docker run -p 6379:6379 -d redis:5
     ```
 
 2. Start the backend server

@@ -3,10 +3,9 @@ import styles from './FixationSessionHost.module.scss';
 import { useLocation } from 'react-router-dom';
 import { FixationSession } from '../../interfaces/FixationSession';
 import FixationSessionStart from '../FixationSessionStart/FixationSessionStart';
-import { FixationSessionHostProps } from '../../interfaces/props/FixationSessionHost.props';
 import { getFixation, getFixationPlayers, getFixationQuestion, getFixationQuestionAnswers, getFixationQuestionsAndAnswers } from '../../services/fixation.service';
 import { FixationSessionPlayer } from '../../interfaces/FixationSessionPlayer';
-import { JoinSessionReceivedEventPayload, SessionQuestionChangedEvent, SessionQuestionRevealAnswersEvent, SessionSongChangedEvent, SessionStartedEvent, SocketEventReceived } from '../../interfaces/websockets/SocketEvents';
+import { JoinSessionReceivedEventPayload, SessionOpenedEvent, SessionQuestionChangedEvent, SessionQuestionRevealAnswersEvent, SessionSongChangedEvent, SessionStartedEvent, SocketEventReceived } from '../../interfaces/websockets/SocketEvents';
 import { Card, CardContent, Grid, Typography } from '@mui/material';
 import FixationSessionInstructions from '../FixationSessionInstructions/FixationSessionInstructions';
 import MusicPlayer from '../MusicPlayer/MusicPlayer';
@@ -21,6 +20,13 @@ import CountdownTimer from '../CountdownTimer/CountdownTimer';
 import FixationSessionAnswer from '../FixationSessionAnswer/FixationSessionAnswer';
 import FixationSessionEnd from '../FixationSessionEnd/FixationSessionEnd';
 import { socketEventNames } from '../../interfaces/websockets/socketUtils';
+import { HypertriviationUser } from '../../interfaces/HypertriviationUser';
+
+interface FixationSessionHostProps {
+  webSocket: WebSocket;
+  isSpotifyAuthenticated: boolean;
+  hostUser: HypertriviationUser;
+}
 
 const FixationSessionHost = (props: FixationSessionHostProps) => {
   const [errorMessage, setErrorMessage] = useState<string>("");
@@ -162,6 +168,7 @@ const FixationSessionHost = (props: FixationSessionHostProps) => {
 
   const sendSessionStartedEvent = () => {
     let message: SessionStartedEvent = {
+      group: fixationSession.code,
       model: "session_started",
       payload: {
         fixation_id: fixationSession.fixationId,
@@ -178,6 +185,7 @@ const FixationSessionHost = (props: FixationSessionHostProps) => {
 
   const sendSessionQuestionChangeEvent = (idx: number, question: FixationQuestion, answers: FixationAnswer[]) => {
     let message: SessionQuestionChangedEvent = {
+      group: fixationSession.code,
       model: "session_question_change",
       payload: {
         fixation_id: fixationSession.fixationId,
@@ -195,6 +203,7 @@ const FixationSessionHost = (props: FixationSessionHostProps) => {
 
   const sendSessionSongChangeEvent = (songName: string, artistName: string) => {
     let message: SessionSongChangedEvent = {
+      group: fixationSession.code,
       model: "session_song_change",
       payload: {
         fixation_id: fixationSession.fixationId,
@@ -211,6 +220,7 @@ const FixationSessionHost = (props: FixationSessionHostProps) => {
 
   const sendSessionQuestionRevealAnswersEvent = (idx: number, question: FixationQuestion) => {
     let message: SessionQuestionRevealAnswersEvent = {
+      group: fixationSession.code,
       model: "session_question_reveal_answer",
       payload: {
         fixation_id: fixationSession.fixationId,

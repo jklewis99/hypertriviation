@@ -24,6 +24,7 @@ const FixationPlayerQuestion: FC<FixationPlayerQuestionProps> = (props) => {
     // TODO: update to SubmitAnswer event type
     console.log(answerId);
     let message: QuestionAnsweredEvent = {
+      group: props.roomCode,
       model: "answer",
       payload: {
         display_name: props.displayName,

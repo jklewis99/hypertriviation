@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { FixationAnswer } from '../../interfaces/FixationAnswer';
 import { FixationQuestion } from '../../interfaces/FixationQuestion';
-import { PlayerFixationProps } from '../../interfaces/props/PlayerFixation.props';
 import { SocketEventReceived,
   SessionQuestionChangedEventPayload,
   QuestionAnsweredSendEventPayload,
@@ -23,6 +22,8 @@ interface SongForPlayer {
   artistName: string;
 }
 
+interface PlayerFixationProps {}
+
 const FixationPlayer = (props: PlayerFixationProps) => {
   const [inFixationSession, setInFixationSession] = useState<boolean>(false);
   const [displayName, setDisplayName] = useState<string>();
@@ -33,14 +34,16 @@ const FixationPlayer = (props: PlayerFixationProps) => {
   const [currentAnswers, setCurrentAnswers] = useState<FixationAnswer[]>([]);
   const [multipleChoiceInd, setMultipleChoiceInd] = useState<boolean>(false);
   const [revealAnswersInd, setRevealAnswersInd] = useState<boolean>(false);
-  const webSocket = useRef<WebSocket>(props.webSocket).current;
+  const [webSocket, setWebSocket] = useState<WebSocket>();
   
   useEffect(() => {
-    webSocket.onmessage = (event) => {
-      let event_json = JSON.parse(event.data);
-      handleSocketEvent(event_json);
+    if (webSocket) {
+      webSocket.onmessage = (event) => {
+        let event_json = JSON.parse(event.data);
+        handleSocketEvent(event_json);
+      }
     }
-  });
+  }, [webSocket]);
 
   const handleSocketEvent = (socketMessage: SocketEventReceived) => {
     console.log(socketMessage.data);
@@ -86,7 +89,8 @@ const FixationPlayer = (props: PlayerFixationProps) => {
     }
   }
 
-  const setJoined = (displayName: string, roomCode: string) => {
+  const setJoined = (newWebSocket: WebSocket, displayName: string, roomCode: string) => {
+    setWebSocket(newWebSocket);
     setInFixationSession(true)
     setDisplayName(displayName);
     setRoomCode(roomCode);
@@ -96,7 +100,7 @@ const FixationPlayer = (props: PlayerFixationProps) => {
   if (!inFixationSession) {
     return (
       <div className={styles.PlayerFixation} data-testid="PlayerFixation">
-        <FixationPlayerJoin webSocket={props.webSocket} setJoinedCallback={setJoined}/>
+        <FixationPlayerJoin setJoinedCallback={setJoined}/>
       </div>
     )
   }
@@ -106,7 +110,7 @@ const FixationPlayer = (props: PlayerFixationProps) => {
         {displayName}
       </div>
       {
-        isFixationSessionActive
+        isFixationSessionActive && webSocket
         ?
         (
           currentQuestion && currentAnswers && roomCode && displayName

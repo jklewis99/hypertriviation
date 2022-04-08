@@ -29,38 +29,9 @@ const AppRouter = () => {
   const [isSpotifyAuthenticated, setIsSpotifyAuthenticated] = useState<boolean>(false);
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
   const [user, setUser] = useState<HypertriviationUser>();
-  const webSocket = new WebSocket(webSocketConnectionString)
-
-  const connectWebSocket = () => {
-    webSocket.onopen = (event) => console.log("WebSocket connected!", event);
-    webSocket.onmessage = (event) => console.log("EVENT DATA: ", event.data);
-    webSocket.onclose = (event) => {
-      console.log(
-        `WebSocket is closed. Reconnect will be attempted in 1 second.`,
-        event
-      );
-      setTimeout(() => {
-        connectWebSocket();
-      }, 1000);
-    };
-    webSocket.onerror = (event: Event) => {
-      console.error(
-        "WebSocket encountered error: ",
-        event,
-        "Closing socket"
-      )
-      webSocket.close();
-    };
-
-    // if (webSocket.readyState == WebSocket.OPEN) {
-    //   webSocket.onopen = () => {
-    //     console.log("Websocket is open now");
-    //   };
-    // }
-  }
+  const [webSocket, setWebSocket] = useState<WebSocket>();
 
   useEffect(() => {
-    connectWebSocket();
     checkUserSignedIn();
   }, [])
 
@@ -102,6 +73,10 @@ const AppRouter = () => {
     setIsSpotifyAuthenticated(status);
   }
 
+  const handleWebSocketConnection = (newWebSocket: WebSocket) => {
+    setWebSocket(newWebSocket);
+  }
+
   return (
     <div className={styles.AppRouter} data-testid="AppRouter">
       <Router>
@@ -111,9 +86,37 @@ const AppRouter = () => {
           {user ? <Route path="/fixations/create" element={<FixationCreate userId={user.id}/>} /> : null }
           {user ? <Route path="/fixations/create/:fixationId" element={<FixationQuestionCreate userId={user.id}/>}/> : null }
           <Route path="/fixations/list" element={<FixationList />} />
-          <Route path="/fixations/:roomName" element={<FixationView isSpotifyAuthenticated={isSpotifyAuthenticated} />} />
-          <Route path="/fixations/session/:code" element={<FixationSessionHost webSocket={webSocket} isSpotifyAuthenticated={isSpotifyAuthenticated}/>} />
-          <Route path="/live" element={<FixationPlayer webSocket={webSocket}/>} />
+          {
+            user
+            ? 
+            <Route path="/fixations/:roomName"
+              element={
+                <FixationView
+                  isSpotifyAuthenticated={isSpotifyAuthenticated}
+                  user={user}
+                  setWebSocket={handleWebSocketConnection}
+                />
+              }
+            />
+            :
+            null
+          }
+          {
+            user && webSocket
+            ?
+            <Route path="/fixations/session/:code"
+              element={
+                <FixationSessionHost
+                  webSocket={webSocket}
+                  isSpotifyAuthenticated={isSpotifyAuthenticated}
+                  hostUser={user}
+                />
+              }
+            />
+            :
+            null
+          }
+          <Route path="/live" element={<FixationPlayer/>} />
           <Route path="/user/access" element={<UserForm/>}/>
           <Route path="/user/myaccount" element={<UserProfile handleSpotifyAuthenticationCallback={authenticateSpotify}/>}/>
           

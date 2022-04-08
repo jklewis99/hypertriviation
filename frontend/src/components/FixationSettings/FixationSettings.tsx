@@ -5,12 +5,13 @@ import {
   Dialog, MenuItem, Grid, ClickAwayListener, Divider, FormControl, Switch, Select,
   InputLabel, FormControlLabel, FormGroup, ToggleButton, ToggleButtonGroup, useMediaQuery
 } from "@mui/material";
-import { FixationSessionSettingsProps } from '../../interfaces/props/FixationSessionSettings.props';
 import { TimeLimit } from '../../interfaces/TimeLimit';
 import { FixationSessionSettings } from '../../interfaces/FixationSessionSettings';
 import { SetFixationSessionSettings } from '../../interfaces/payloads/SetFixationSessionSettings.payload';
-import { FixationSettingsProps } from '../../interfaces/props/FixationSettings.props';
 
+interface FixationSettingsProps {
+  setSettingsCallback: (event: any, value?: number) => void;
+}
 
 const FixationSettings = (props: FixationSettingsProps) => {
   const timeLimitOptions: TimeLimit[] = [

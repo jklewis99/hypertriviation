@@ -1,22 +1,30 @@
-import asyncio
 import json
-from channels.consumer import AsyncConsumer
 from channels.generic.websocket import AsyncWebsocketConsumer
-from random import randint
-from time import sleep
 
 from django.conf import settings
 from .event_handler import handle_event
 
 class FixationSessionConsumer(AsyncWebsocketConsumer):
-    group_name = settings.STREAM_SOCKET_GROUP_NAME
+    group_name = ""
+    groups = set([settings.STREAM_SOCKET_GROUP_NAME])
 
     async def connect(self):
-        # Joining group
+        session_id = self.scope['url_route']['kwargs']['code']
+        group_name = f"session_code_{session_id}"
+        print("==="*10)
+        print("BEFORE CONNECT:", self.group_name)
+        print("==="*10)
+        self.group_name = group_name
+        self.groups.add(group_name)
+        print(session_id)
+        # Joining group but not actually because this doesn't work
         await self.channel_layer.group_add(
-            self.group_name,
+            group_name,
             self.channel_name
         )
+        print("==="*10)
+        print("AFTER CONNECT:", self.group_name)
+        print("==="*10)
         await self.accept()
 
     async def disconnect(self, close_code):
@@ -27,17 +35,20 @@ class FixationSessionConsumer(AsyncWebsocketConsumer):
         )
 
     async def receive(self, text_data):
-        print("receive", text_data)
-
-        # check the type of event
-        # event should be the following structure:
-        #   {
-        #       type: string,
-        #       text: JSON string {
-        #           event: string,
-        #           payload: JSON String    
-        #       }
-        #   }
+        '''
+        check the type of event
+        event should be the following structure:
+          {
+              type: string,
+              text: JSON string {
+                  event: string,
+                  group: string,
+                  payload: JSON String    
+              }
+          }
+        '''
+        session_id = self.scope['url_route']['kwargs']['code']
+        group_name = f"session_code_{session_id}"
         event_json = json.loads(text_data)
 
         if "message" not in event_json:
@@ -48,24 +59,25 @@ class FixationSessionConsumer(AsyncWebsocketConsumer):
         if "model" not in event_json:
             return
         
-        success, message, payload_to_emit = handle_event(event_json)
-        print("\n")
-        print(success)
-        print(message)
-        print(payload_to_emit)
-        print("\n")
-
-        await self.channel_layer.group_send(
-            self.group_name,
-            {
-                "type": "fixation_event",
-                "data": {
-                    "event": event_json["model"],
-                    "success": success,
-                    "message": message,
-                    "data": payload_to_emit
-                }
-            })
+        if "group" not in event_json:
+            return
+        
+        print("==="*10)
+        print("SEND MESSAGE:", self.group_name)
+        print("==="*10)
+        success, message, payload_to_emit, _ = handle_event(event_json)
+        if session_id and group_name in self.groups:
+            await self.channel_layer.group_send(
+                group_name,
+                {
+                    "type": "fixation_event",
+                    "data": {
+                        "event": event_json["model"],
+                        "success": success,
+                        "message": message,
+                        "data": payload_to_emit
+                    }
+                })
         
     async def fixation_event(self, event):
         # Receive data from group

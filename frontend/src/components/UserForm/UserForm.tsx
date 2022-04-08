@@ -100,7 +100,7 @@ const UserForm = () => {
   const handleSubmit = (event: any) => {
     event.preventDefault();
     if (!isValid()) return;
-
+    debugger;
     if (isRegistrataion){
       register(values.username, values.password, values.email, values.firstName, values.lastName)
         .then((data) => {

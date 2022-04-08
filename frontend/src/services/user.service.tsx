@@ -12,8 +12,7 @@ export function login(username: string, password: string): Promise<UserAuthoriza
   return new Promise((resolve, reject) => {
     httpClient.post(
       `${relativePath}/token/obtain/`,
-      user,
-      getAuthorizationHeader()
+      user
     )
       .then(response => {
         resolve(response.data)

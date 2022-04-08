@@ -9,7 +9,7 @@ application = ProtocolTypeRouter({
     'websocket': AllowedHostsOriginValidator(
         AuthMiddlewareStack(
             URLRouter([
-                path('websockets', FixationSessionConsumer.as_asgi())
+                path('websockets/<str:code>', FixationSessionConsumer.as_asgi())
             ])
         )
     )

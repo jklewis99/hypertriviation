@@ -1,5 +1,30 @@
-export interface JoinSessionEvent {
+export interface SocketEvent {
+  group: string;
   model: string;
+}
+
+export interface SessionOpenedEvent extends SocketEvent {
+  payload: SessionOpenedEventPayload;
+}
+
+export interface SessionOpenedEventPayload {
+  fixation_id: number;
+  room_code: string;
+  host: string;
+}
+
+export interface SessionStartedEvent extends SocketEvent {
+  payload: SessionStartedEventPayload;
+}
+
+export interface SessionStartedEventPayload {
+  fixation_id: number;
+  room_code: string;
+  session_started: boolean;
+  multiple_choice_ind: boolean;
+}
+
+export interface JoinSessionEvent extends SocketEvent {
   payload: JoinSessionSendEventPayload;
 }
 
@@ -9,8 +34,7 @@ interface JoinSessionSendEventPayload {
   player_session_id?: string;
 }
 
-export interface QuestionAnsweredEvent {
-  model: string;
+export interface QuestionAnsweredEvent extends SocketEvent {
   payload: QuestionAnsweredSendEventPayload;
 }
 
@@ -23,20 +47,7 @@ export interface QuestionAnsweredSendEventPayload {
   answer_txt: string;
 }
 
-export interface SessionStartedEvent {
-  model: string;
-  payload: SessionStartedEventPayload;
-}
-
-export interface SessionStartedEventPayload {
-  fixation_id: number;
-  room_code: string;
-  session_started: boolean;
-  multiple_choice_ind: boolean;
-}
-
-export interface SessionQuestionChangedEvent {
-  model: string;
+export interface SessionQuestionChangedEvent extends SocketEvent {
   payload: SessionQuestionChangedEventPayload;
 }
 
@@ -48,8 +59,7 @@ export interface SessionQuestionChangedEventPayload {
   answers: any[]; // TODO: needs to be an array of tuples with id and txt
 }
 
-export interface SessionSongChangedEvent {
-  model: string;
+export interface SessionSongChangedEvent extends SocketEvent {
   payload: SessionSongChangedEventPayload;
 }
 
@@ -60,8 +70,7 @@ export interface SessionSongChangedEventPayload {
   artist_name: string;
 }
 
-export interface SessionQuestionRevealAnswersEvent {
-  model: string;
+export interface SessionQuestionRevealAnswersEvent extends SocketEvent {
   payload: SessionQuestionRevealAnswersEventPayload;
 }
 
