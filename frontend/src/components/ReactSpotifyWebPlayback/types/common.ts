@@ -27,6 +27,8 @@ export interface Props {
   updateSavedStatus?: (fn: (status: boolean) => any) => any;
   uris?: string | string[];
   position?: number;
+  showHints: boolean;
+  durationMs: number;
 }
 
 export interface State {

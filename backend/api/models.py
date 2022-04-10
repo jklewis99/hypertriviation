@@ -150,6 +150,7 @@ class FixationSessionSettings(models.Model):
     multiple_choice_ind = models.BooleanField(null=False, default=True)
     random_shuffle_ind = models.BooleanField(null=False, default=True)
     stop_on_answer_ind = models.BooleanField(null=False, default=False)
+    spotify_random_start_ind = models.BooleanField(null=True, default=False)
     time_limit = models.IntegerField(choices=TimeLimitOptions.choices, default=TimeLimitOptions.UNLIMITED)
     active_ind = models.BooleanField(null=False, default=True)
     created_ts = models.DateTimeField(auto_now_add=True)

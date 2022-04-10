@@ -7,12 +7,12 @@ interface AlbumCoverHolderProps {
   id: string;
   alt: string;
   src: string;
-  timeLimit: number;
-  timeRemaining: number;
+  durationMs: number;
+  doShow: boolean;
 }
 
 const AlbumCoverHolder = (props: AlbumCoverHolderProps) => {
-  const squareLength = Math.floor(Math.sqrt(props.timeLimit * 10))
+  const squareLength = Math.floor(Math.sqrt(324)) // 1 square for every second (30000 / 100 = 300)
   const arrayLength = Math.pow(squareLength, 2);
   const percentFill = 100 * squareLength / arrayLength
   const pixelStyle = {
@@ -21,7 +21,8 @@ const AlbumCoverHolder = (props: AlbumCoverHolderProps) => {
   }
   const [divArray, setDivArray] = useState(Array(arrayLength).fill(true));
   const [pixelOrderToRemove, setPixelOrderToRemove] = useState<number[]>();
-  const [intervalTime, setIntervalTime] = useState<number>(1000);
+
+  const [intervalTime, setIntervalTime] = useState<number>(Math.ceil(props.durationMs / arrayLength));
 
   useEffect(() => {
     setDivArray(Array(arrayLength).fill(true));
@@ -29,18 +30,19 @@ const AlbumCoverHolder = (props: AlbumCoverHolderProps) => {
   }, [props.src])
 
   useEffect(() => {
-    if (pixelOrderToRemove?.length) {
-      setIntervalTime(Math.ceil(props.timeRemaining / pixelOrderToRemove.length))
-    }
-  }, [props.timeRemaining])
+    setIntervalTime(Math.ceil(props.durationMs / arrayLength));
+  }, [props.durationMs])
 
   const showPixel = () => {
+    if (!props.doShow) {
+      return
+    }
     let ind = pixelOrderToRemove?.pop() as number;
     divArray[ind] = false;
   }
 
   //TODO: remove pixel with beat of song?? or add dynamic pacing (reveal more quickly as time moves along)
-  useInterval(showPixel, pixelOrderToRemove?.length ? intervalTime : null)
+  useInterval(showPixel, pixelOrderToRemove?.length && intervalTime ? intervalTime : null)
 
   return (
     <div className={styles.albumCoverContainer}>

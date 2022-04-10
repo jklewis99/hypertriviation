@@ -6,8 +6,8 @@ from rest_framework import generics, status
 from api.db_helper import join_room
 from authentication.models import HypertriviationUser
 from .forms import FixationAnswerForm, FixationForm, FixationQuestionForm
-from .serializers import FixationAnswerSerializer, FixationQuestionSerializer, FixationSerializer, FixationSessionSerializer, FixationSessionSettingsSerializer, GetFixationSessionPlayersSerializer, RoomSerializer, CreateRoomSerializer, StartFixationSessionSerializer, UpdateRoomSerializer, UserSerializer
-from .models import Fixation, FixationAnswer, FixationCategory, FixationQuestion, FixationSession, FixationSessionPlayer, FixationSessionSettings, Room, User
+from .serializers import FixationAnswerSerializer, FixationQuestionSerializer, FixationSerializer, FixationSessionSerializer, FixationSessionSettingsSerializer, GetFixationSessionPlayersSerializer, StartFixationSessionSerializer, UserSerializer
+from .models import Fixation, FixationAnswer, FixationCategory, FixationQuestion, FixationSession, FixationSessionPlayer, FixationSessionSettings, User
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.http import JsonResponse
@@ -214,40 +214,15 @@ class SetFixationSessionSettings(APIView):
     """
     serializer_class = FixationSessionSettingsSerializer
     def post(self, request, format=None, *args, **kwargs):
-        code = request.data.get('fixation_session_code')
-        if code != None:
-            fixation_session = FixationSession.objects.filter(code=code)
-            if fixation_session.exists():
-                fixation_session = fixation_session[0]
-                fixation_session_settings = FixationSessionSettings.objects.filter(fixation_session=fixation_session)
-                show_hints_ind = request.data.get('show_hints_ind')
-                multiple_choice_ind = request.data.get('multiple_choice_ind')
-                random_shuffle_ind = request.data.get('random_shuffle_ind')
-                stop_on_answer_ind = request.data.get('stop_on_answer_ind')
-                time_limit = request.data.get('time_limit')
-                if fixation_session_settings.exists():
-                    # update
-                    fixation_session_settings.update(show_hints_ind=show_hints_ind,
-                                                    multiple_choice_ind=multiple_choice_ind,
-                                                    random_shuffle_ind=random_shuffle_ind,
-                                                    stop_on_answer_ind=stop_on_answer_ind,
-                                                    time_limit=time_limit)
-                    data = FixationSessionSettingsSerializer(fixation_session_settings.refresh_from_db()).data
-                    return Response(data, status=status.HTTP_200_OK)
-                # otherwise save
-                fixation_session_settings = FixationSessionSettings(
-                                                    fixation_session=fixation_session,
-                                                    show_hints_ind=show_hints_ind,
-                                                    multiple_choice_ind=multiple_choice_ind,
-                                                    random_shuffle_ind=random_shuffle_ind,
-                                                    stop_on_answer_ind=stop_on_answer_ind,
-                                                    time_limit=time_limit)
-                fixation_session_settings.save()
-                return Response(FixationSessionSettingsSerializer(fixation_session_settings).data, status=status.HTTP_201_CREATED)
-            return Response({'Fixation session not Found': 'No active fixation session with code \'code\''},
-                            status=status.HTTP_404_NOT_FOUND)
-
-        return Response({'Bad Request': 'code not found in request'}, status=status.HTTP_400_BAD_REQUEST)
+        serializer = self.serializer_class(data=request.data)
+        if (serializer.is_valid()):
+            existing_instance = FixationSessionSettings.objects.filter(fixation_session=serializer.validated_data["fixation_session"])
+            if existing_instance.exists():
+                serializer.update(existing_instance[0], serializer.validated_data)
+                return Response(self.serializer_class(existing_instance[0]).data, status=status.HTTP_200_OK)
+            instance = serializer.save()
+            return Response(FixationSessionSettingsSerializer(instance).data, status=status.HTTP_201_CREATED)
+        return Response({'Bad Request': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
 class GetFixationSessionPlayers(APIView):
     serializer_class = GetFixationSessionPlayersSerializer

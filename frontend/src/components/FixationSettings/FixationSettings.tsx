@@ -7,7 +7,6 @@ import {
 } from "@mui/material";
 import { TimeLimit } from '../../interfaces/TimeLimit';
 import { FixationSessionSettings } from '../../interfaces/FixationSessionSettings';
-import { SetFixationSessionSettings } from '../../interfaces/payloads/SetFixationSessionSettings.payload';
 
 interface FixationSettingsProps {
   setSettingsCallback: (event: any, value?: number) => void;
@@ -28,6 +27,7 @@ const FixationSettings = (props: FixationSettingsProps) => {
     doShowHints: props.isMusic,
     isRandomlyShuffled: true,
     doStopOnAnswer: false,
+    isSpotifyRandomStart: false,
   });
 
   const handleChange = (event: any) => {
@@ -93,6 +93,16 @@ const FixationSettings = (props: FixationSettingsProps) => {
                 name="isRandomlyShuffled"
               />}
             label="Shuffle Questions"
+          />
+          <FormControlLabel
+            control={
+              <Switch
+                checked={state.isSpotifyRandomStart}
+                onChange={handleChange}
+                name="isSpotifyRandomStart"
+                disabled={!props.isMusic}
+              />}
+            label="Random Start Time"
           />
           <FormControlLabel
             control={

@@ -1,27 +1,6 @@
 from rest_framework import serializers
 from .models import Fixation, FixationAnswer, FixationQuestion, FixationSession, FixationSessionPlayer, FixationSessionSettings, Room, TimeLimitOptions, User
 
-
-class RoomSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Room
-        fields = ('id', 'code', 'host', 'guest_can_pause',
-                  'votes_to_skip', 'created_at')
-
-class CreateRoomSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Room
-        fields = ('guest_can_pause', 'votes_to_skip')
-
-class UpdateRoomSerializer(serializers.ModelSerializer):
-    # redefine code field so we reference a "different" code field (code won't be unique in this request)
-    code = serializers.CharField(validators=[])
-
-    class Meta:
-        model = Room
-        fields = ('guest_can_pause', 'votes_to_skip', 'code')
-
-
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
@@ -106,10 +85,9 @@ class GetFixationSessionPlayersSerializer(serializers.ModelSerializer):
         fields = ('fixation_session_code', 'display_name', 'player_session_id', 'active_ind', 'added_at')
 
 class FixationSessionSettingsSerializer(serializers.ModelSerializer):
-    fixation_session_code = serializers.CharField(source='fixation_session.code')
-
-    # fixation_session = serializers.SlugRelatedField(FixationSession.objects.all())
-    # fixation_sessiona = serializers.RelatedField
+    # fixation_session = FixationSessionSerializer(read_only=True)
+    # fixation_session_id = serializers.IntegerField(source='fixation_session.id')
+    fixation_session_code = serializers.CharField(source='fixation_session.code', required=False)
     show_hints_ind = serializers.BooleanField(required=False)
     multiple_choice_ind = serializers.BooleanField(required=False)
     random_shuffle_ind = serializers.BooleanField(required=False)
@@ -119,6 +97,7 @@ class FixationSessionSettingsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = FixationSessionSettings
-        fields = ('fixation_session_code', 'show_hints_ind', 'multiple_choice_ind', 'random_shuffle_ind',
+        fields = ('fixation_session_code', 'fixation_session', 'show_hints_ind', 'multiple_choice_ind', 'random_shuffle_ind',
                     'stop_on_answer_ind', 'spotify_random_start_ind', 'time_limit', 'active_ind', 'created_ts')
+        extra_kwargs = {'fixation_session': {'write_only': True}}
 
