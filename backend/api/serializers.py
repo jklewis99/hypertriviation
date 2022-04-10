@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Fixation, FixationAnswer, FixationQuestion, FixationSession, FixationSessionPlayer, FixationSessionSettings, Room, User
+from .models import Fixation, FixationAnswer, FixationQuestion, FixationSession, FixationSessionPlayer, FixationSessionSettings, Room, TimeLimitOptions, User
 
 
 class RoomSerializer(serializers.ModelSerializer):
@@ -48,23 +48,7 @@ class FixationSerializer(serializers.ModelSerializer):
             'updated_at'
         )
 
-class FixationQuestionSerializer(serializers.ModelSerializer):
-    fixation_id = serializers.IntegerField(source='fixation.id')
-    class Meta:
-        model = FixationQuestion
-        fields = (
-            'id',
-            'fixation_id',
-            'question_idx', 
-            'question_txt',
-            'multiple_choice_ind', 
-            'img_url',
-            'video_playback_url',
-            'created_by',
-            'question_category',
-            'created_at', 
-            'updated_at'
-        )
+
 
 class FixationAnswerSerializer(serializers.ModelSerializer):
     question_id = serializers.IntegerField(source='question.id')
@@ -80,6 +64,26 @@ class FixationAnswerSerializer(serializers.ModelSerializer):
             'updated_at'
         )
 
+class FixationQuestionSerializer(serializers.ModelSerializer):
+    fixation_id = serializers.IntegerField(source='fixation.id')
+    answers = FixationAnswerSerializer(many=True)
+
+    class Meta:
+        model = FixationQuestion
+        fields = (
+            'id',
+            'fixation_id',
+            'question_idx', 
+            'question_txt',
+            'multiple_choice_ind', 
+            'img_url',
+            'video_playback_url',
+            'created_by',
+            'question_category',
+            'created_at', 
+            'updated_at',
+            'answers'
+        )
 class FixationSessionSerializer(serializers.ModelSerializer):
     fixation_id = serializers.CharField(source='fixation.id')
     class Meta:
@@ -103,8 +107,18 @@ class GetFixationSessionPlayersSerializer(serializers.ModelSerializer):
 
 class FixationSessionSettingsSerializer(serializers.ModelSerializer):
     fixation_session_code = serializers.CharField(source='fixation_session.code')
+
+    # fixation_session = serializers.SlugRelatedField(FixationSession.objects.all())
+    # fixation_sessiona = serializers.RelatedField
+    show_hints_ind = serializers.BooleanField(required=False)
+    multiple_choice_ind = serializers.BooleanField(required=False)
+    random_shuffle_ind = serializers.BooleanField(required=False)
+    stop_on_answer_ind = serializers.BooleanField(required=False)
+    spotify_random_start_ind = serializers.BooleanField(required=False)
+    time_limit = serializers.ChoiceField(choices=TimeLimitOptions.choices, required=False)
+
     class Meta:
         model = FixationSessionSettings
         fields = ('fixation_session_code', 'show_hints_ind', 'multiple_choice_ind', 'random_shuffle_ind',
-                    'stop_on_answer_ind', 'time_limit', 'active_ind', 'created_ts')
+                    'stop_on_answer_ind', 'spotify_random_start_ind', 'time_limit', 'active_ind', 'created_ts')
 

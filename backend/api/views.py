@@ -59,8 +59,9 @@ class GetFixation(APIView):
 class FixationQuestionView(APIView):
     serializer_class = FixationQuestionSerializer
     def get(self, request, format=None, *args, **kwargs):
-        if request.question_id != None:
-            fixation_question = FixationQuestion.objects.filter(id=request.question_id)
+        question_id = request.GET.get('question_id');
+        if question_id != None:
+            fixation_question = FixationQuestion.objects.filter(id=question_id)
             if fixation_question.exists():
                 data = FixationQuestionSerializer(fixation_question[0]).data
                 return Response(data, status=status.HTTP_200_OK)

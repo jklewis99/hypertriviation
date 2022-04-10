@@ -75,7 +75,7 @@ export function getFixation(fixationId: number): Promise<Fixation> {
 export function getFixationQuestion(questionId: number): Promise<FixationQuestion> {
   return new Promise((resolve, reject) => {
     httpClient.get(
-      `${relativePath}/question/${questionId}`,
+      `${relativePath}/question?question_id=${questionId}`,
       getAuthorizationHeader()
     )
       .then(response => {
