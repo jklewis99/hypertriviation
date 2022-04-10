@@ -1,18 +1,4 @@
 .SpotifyPlaylistList {
-    position: fixed;
-    // display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-    max-width: 750px;
-    width: 75vw;
-    height: 85vh;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    border: 1px solid;
-    box-shadow: 0 8px 40px -12px #ffffffcb;
-    background-color: black;
+    height: 100%;
     overflow-y: scroll;
-    padding: 10px;
 }

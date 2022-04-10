@@ -1,0 +1,26 @@
+.FixationSessionPlayersList {
+    width: 100%;
+    .fixationSessionPlayer {
+        padding: 2px;
+        max-width: 100px;
+    }
+    .thinking {
+        animation: wipe_in_up 6s infinite both;
+        max-width: 100%;
+    }
+    .answered {
+        max-width: 100%;
+    }
+    @keyframes wipe_in_up {
+        0% {
+            clip-path: inset(100% 0 0 0);
+        }
+        50% {
+            clip-path: inset(0 0 0 0);
+        }
+        100% {
+            clip-path: inset(100% 0 0 0);
+
+        }
+    }
+}

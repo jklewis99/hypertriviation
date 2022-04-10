@@ -64,4 +64,14 @@
     transform: translate(-50%, -50%);
     background-color: #000000e5;
     z-index: 9999;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    max-width: 750px;
+    width: 75vw;
+    height: 85vh;
+    border: 1px solid;
+    box-shadow: 0 8px 40px -12px #ffffffcb;
+    background-color: black;
+    padding: 10px;
 }

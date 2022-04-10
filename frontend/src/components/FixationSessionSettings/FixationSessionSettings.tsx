@@ -4,10 +4,12 @@ import React from 'react';
 import FixationSettings from '../FixationSettings/FixationSettings';
 import { SetFixationSessionSettings } from '../../interfaces/payloads/SetFixationSessionSettings.payload';
 import styles from './FixationSessionSettings.module.scss';
+import { Fixation } from '../../interfaces/Fixation';
 
 interface FixationSessionSettingsProps {
   closeModalCallback: () => void;
   startFixationCallback: (settings: SetFixationSessionSettings) => void;
+  selectedFixation: Fixation;
 }
 
 const FixationSessionSettings = (props: FixationSessionSettingsProps) => {
@@ -49,7 +51,7 @@ const FixationSessionSettings = (props: FixationSessionSettingsProps) => {
   return (
     <ClickAwayListener onClickAway={props.closeModalCallback}>
       <Card className={styles.FixationSessionSettings} data-testid="FixationSessionSettings">
-        <FixationSettings setSettingsCallback={setSettings} />
+        <FixationSettings setSettingsCallback={setSettings} isMusic={props.selectedFixation.spotifyPlaylistId !== ""}/>
         <CardActions className={styles.bottomButtons}>
           <Button size="medium" variant="contained" color="secondary" onClick={props.closeModalCallback} style={{ margin: "10px 20px" }}>Exit</Button>
           <Button size="medium" variant="contained" color="primary" onClick={setFixationSettings} style={{ margin: "0 20px" }}>Start</Button>

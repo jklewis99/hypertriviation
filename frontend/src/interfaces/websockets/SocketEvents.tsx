@@ -43,7 +43,7 @@ export interface QuestionAnsweredSendEventPayload {
   player_session_id?: string;
   room_code: string;
   question_id: number;
-  answer_id: number;
+  answer_id?: number;
   answer_txt: string;
 }
 
@@ -87,6 +87,7 @@ export interface SocketEventReceived {
   event: string;
   success: boolean;
   message: string;
+  code: string;
   data: JoinSessionReceivedEventPayload |
   QuestionAnsweredSendEventPayload | 
   SessionStartedEventPayload | 

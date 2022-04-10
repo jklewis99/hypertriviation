@@ -8,48 +8,24 @@ import science from '../../assets/icons/science.svg';
 import drama from '../../assets/icons/drama.svg';
 import music from '../../assets/icons/music.svg';
 import puzzle from '../../assets/icons/puzzle.svg';
+import FixationAnswerCard from '../FixationAnswerCard/FixationAnswerCard';
 
 interface FixationSessionAnswerProps {
   answers: FixationAnswer[];
   revealAnswers: boolean;
   isMultipleChoice: boolean;
   isPlayer?: boolean;
-  submitAnswerCallback?: (answerId: number, answerTxt: string) => void;
+  submitAnswerCallback?: (answerTxt: string, answerId?: number) => void;
 }
 
 const FixationSessionAnswer: FC<FixationSessionAnswerProps> = (props) => {
 
-  const handleAnswerClick = (answerId: number, answerTxt: string) => {
+  const handleAnswerClick = (answerTxt: string, answerId?: number) => {
     if (props.submitAnswerCallback) {
-      props.submitAnswerCallback(answerId, answerTxt);
+      props.submitAnswerCallback(answerTxt, answerId);
     }
 
   }
-  const answerOptionsStyles = [
-    {
-      backgroundColor: "#4287f5"
-    },
-    {
-      backgroundColor: "#f59b42"
-    },
-    {
-      backgroundColor: "#44d471"
-    },
-    {
-      backgroundColor: "#d44450"
-    },
-    {
-      backgroundColor: "orange"
-    }
-  ];
-
-  const answerIcons = [
-    <img src={math}/>,
-    <img src={science} />,
-    <img src={drama} />,
-    <img src={music}/>,
-    <img src={puzzle} />,
-  ]
 
   const answers = props.answers;
   if (props.isMultipleChoice) {
@@ -66,7 +42,16 @@ const FixationSessionAnswer: FC<FixationSessionAnswerProps> = (props) => {
         >
           {answers.map((answer: FixationAnswer, i: number) => (
             <Grid item xs={6} >
-              <Card
+              <FixationAnswerCard
+                answerId={answer.id}
+                answerTxt={answer.answerTxt}
+                clickable={props.isPlayer || false}
+                reveal={props.revealAnswers}
+                isCorrect={answer.correctAnswerInd}
+                styleIdx={i}
+                onClick={handleAnswerClick}
+              />
+              {/* <Card
                 className={`${styles.answerCard}
                             ${props.revealAnswers 
                               ? (!answer.correctAnswerInd ? styles.wrongAnswerCard : styles.correctAnswerCard) : ''}
@@ -81,7 +66,7 @@ const FixationSessionAnswer: FC<FixationSessionAnswerProps> = (props) => {
                   </Typography>
                 </CardContent>
                 
-              </Card>
+              </Card> */}
             </Grid>
           ))}
         </Grid>

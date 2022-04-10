@@ -608,6 +608,7 @@ class SpotifyWebPlayer extends React.PureComponent<Props, State> {
       getOAuthToken: (callback: SpotifyPlayerCallback) => {
         callback(token);
       },
+      // @ts-ignore
       name,
       volume,
     }) as WebPlaybackPlayer;

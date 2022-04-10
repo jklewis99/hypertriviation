@@ -4,9 +4,15 @@ import React, { useEffect, useState } from 'react';
 import styles from './MusicPlayer.module.scss';
 import SpotifyPlayer, { CallbackState } from '../ReactSpotifyWebPlayback/index';
 import { getTokens, setToShuffle } from '../../services/spotify.service';
-import { MusicPlayerProps } from '../../interfaces/props/SpotifyWebPlayer.props';
 import { CurrentSong } from '../../interfaces/CurrentSong';
 import { idConstants } from '../../utils/constants';
+
+interface MusicPlayerProps {
+  spotifyUri: string;
+  playlistOffset: number;
+  songOffset: number;
+  goToNextSong: (songName: string, artistsName: string) => void;
+}
 
 const MusicPlayer = (props: MusicPlayerProps) => {
   const [token, setToken] = useState("");

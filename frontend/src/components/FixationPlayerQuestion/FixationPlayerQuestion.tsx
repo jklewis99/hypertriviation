@@ -3,6 +3,7 @@ import React, { FC, useEffect, useRef, useState } from 'react';
 import { FixationAnswer } from '../../interfaces/FixationAnswer';
 import { QuestionAnsweredEvent } from '../../interfaces/websockets/SocketEvents';
 import { getFixationQuestionAnswers } from '../../services/fixation.service';
+import { sendQuestionAnsweredEvent } from '../../websockets/websockets';
 import FixationSessionAnswer from '../FixationSessionAnswer/FixationSessionAnswer';
 import styles from './FixationPlayerQuestion.module.scss';
 
@@ -18,24 +19,11 @@ interface FixationPlayerQuestionProps {
 }
 
 const FixationPlayerQuestion: FC<FixationPlayerQuestionProps> = (props) => {
-  const webSocket = useRef<WebSocket>(props.webSocket);
+  const webSocket = useRef<WebSocket>(props.webSocket).current;
 
-  const submitAnswer = (answerId: number, answerTxt: string) => {
+  const submitAnswer = (answerTxt: string, answerId?: number) => {
     // TODO: update to SubmitAnswer event type
-    console.log(answerId);
-    let message: QuestionAnsweredEvent = {
-      group: props.roomCode,
-      model: "answer",
-      payload: {
-        display_name: props.displayName,
-        player_session_id: "abcd",
-        room_code: props.roomCode,
-        question_id: props.questionId,
-        answer_id: answerId,
-        answer_txt: answerTxt
-      }
-    };
-    webSocket.current.send(JSON.stringify(message));
+    sendQuestionAnsweredEvent(webSocket, props.displayName, props.roomCode, props.questionId, answerTxt, answerId);
   }
 
   return (

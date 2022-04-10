@@ -5,7 +5,7 @@ import { FixationSession } from '../../interfaces/FixationSession';
 import FixationSessionStart from '../FixationSessionStart/FixationSessionStart';
 import { getFixation, getFixationPlayers, getFixationQuestion, getFixationQuestionAnswers, getFixationQuestionsAndAnswers } from '../../services/fixation.service';
 import { FixationSessionPlayer } from '../../interfaces/FixationSessionPlayer';
-import { JoinSessionReceivedEventPayload, SessionOpenedEvent, SessionQuestionChangedEvent, SessionQuestionRevealAnswersEvent, SessionSongChangedEvent, SessionStartedEvent, SocketEventReceived } from '../../interfaces/websockets/SocketEvents';
+import { JoinSessionReceivedEventPayload, QuestionAnsweredEvent, QuestionAnsweredSendEventPayload, SessionOpenedEvent, SessionQuestionChangedEvent, SessionQuestionRevealAnswersEvent, SessionQuestionRevealAnswersEventPayload, SessionSongChangedEvent, SessionStartedEvent, SocketEventReceived } from '../../interfaces/websockets/SocketEvents';
 import { Card, CardContent, Grid, Typography } from '@mui/material';
 import FixationSessionInstructions from '../FixationSessionInstructions/FixationSessionInstructions';
 import MusicPlayer from '../MusicPlayer/MusicPlayer';
@@ -19,8 +19,11 @@ import { FixationQuestionAndAnswers } from '../../interfaces/FixationQuestionsAn
 import CountdownTimer from '../CountdownTimer/CountdownTimer';
 import FixationSessionAnswer from '../FixationSessionAnswer/FixationSessionAnswer';
 import FixationSessionEnd from '../FixationSessionEnd/FixationSessionEnd';
-import { socketEventNames } from '../../interfaces/websockets/socketUtils';
 import { HypertriviationUser } from '../../interfaces/HypertriviationUser';
+import { sendSessionQuestionChangeEvent, sendSessionQuestionRevealAnswersEvent, sendSessionSongChangeEvent, sendSessionStartedEvent, socketEventNames } from '../../websockets/websockets';
+import FixationSessionPlayersList from '../FixationSessionPlayersList/FixationSessionPlayersList';
+import FixationSessionAnswerPopup from '../FixationSessionAnswerPopup/FixationSessionAnswerPopup';
+import { SubmittedAnswer } from '../../interfaces/SubmittedAnswer';
 
 interface FixationSessionHostProps {
   webSocket: WebSocket;
@@ -42,6 +45,10 @@ const FixationSessionHost = (props: FixationSessionHostProps) => {
   const [currentQuestionIdx, setCurrentQuestionIdx] = useState<number>(0);
   const [showAnswers, setShowAnswers] = useState<boolean>(false);
   const [isEndOfFixation, setIsEndOfFixation] = useState<boolean>(false);
+  const [latestUserToAnswer, setLatestUserToAnswer] = useState<string>();
+  const [correctPlaylistAnswer, setCorrectPlaylistAnswer] = useState<any>();
+  const [submittedAnswer, setSubmittedAnswer] = useState<SubmittedAnswer>();
+  const [showAnswerPopup, setShowAnswerPopup] = useState<boolean>(false);
   const fixationSession: FixationSession = useLocation().state.session;
   const fixationSessionSettings: FixationSessionSettings = useLocation().state.sessionSettings;
   const webSocket = useRef<WebSocket>(props.webSocket).current;
@@ -66,14 +73,14 @@ const FixationSessionHost = (props: FixationSessionHostProps) => {
 
   useEffect(() => {
     webSocket.onmessage = (event) => {
-      handleUserJoined(JSON.parse(event.data))
+      handleSocketEvent(JSON.parse(event.data))
     }
   });
 
   const handleAllUsersJoined = () => {
     setIsWaitingToStart(false);
     setDoShowInstructions(true);
-    sendSessionStartedEvent();
+    sendSessionStartedEvent(webSocket, fixationSession.code, fixationSession.fixationId, fixationSessionSettings.multipleChoiceInd);
   }
 
   const handleSessionIsLive = () => {
@@ -84,29 +91,6 @@ const FixationSessionHost = (props: FixationSessionHostProps) => {
       setAnswersAndSendSocketEvent(currentQuestionIdx);
     }
     console.log("Session is live");
-  }
-
-  const handleUserJoined = (socketMessage: SocketEventReceived) => {
-    console.log(socketMessage.data)
-    if (socketMessage.success) {
-      let payload = socketMessage.data;
-      if (socketMessage.event === socketEventNames.SESSION_JOIN) {
-        payload = payload as JoinSessionReceivedEventPayload;
-        let player: FixationSessionPlayer = {
-          fixationSession: payload.fixation_session,
-          playerSessionId: payload.player_session_id,
-          displayName: payload.display_name
-        }
-        setJoinedUsers([...joinedUsers, player]);
-      }
-      else {
-        // TODO: handle more socket events
-        return;
-      }
-    }
-    else {
-      setErrorMessage(socketMessage.message)
-    }
   }
 
   const getQuestionAndAnswers = (fixationId: number, pageNumber: number) => {
@@ -120,22 +104,25 @@ const FixationSessionHost = (props: FixationSessionHostProps) => {
       });
   }
 
-  const incrementCurrentQuestionIdx = (change: number) => {
+  const goToNextQuestion = (change: number) => {
     if (change > 0 && currentFixationQuestionsAndAnswers && currentQuestionIdx === currentFixationQuestionsAndAnswers.length - 1) {
       setIsEndOfFixation(true);
       return;
     }
     revealAnswer(false);
+    setLatestUserToAnswer(undefined);
     let questionIdx = currentQuestionIdx + change;
     setAnswersAndSendSocketEvent(questionIdx);
     setCurrentQuestionIdx(questionIdx);
+    setSubmittedAnswer(undefined);
   }
 
   const setAnswersAndSendSocketEvent = (questionIdx: number) => {
     if (currentFixationQuestionsAndAnswers) {
       let answers = knuthShuffle(currentFixationQuestionsAndAnswers[questionIdx].answers)
       setCurrentFixationAnswers(answers);
-      sendSessionQuestionChangeEvent(questionIdx, currentFixationQuestionsAndAnswers[questionIdx].question, answers )
+      sendSessionQuestionChangeEvent(webSocket, questionIdx, fixationSession.code, fixationSession.fixationId,
+        currentFixationQuestionsAndAnswers[questionIdx].question.questionTxt, answers);
     }
   }
 
@@ -145,17 +132,42 @@ const FixationSessionHost = (props: FixationSessionHostProps) => {
       return;
     }
     if (currentFixationQuestionsAndAnswers) {
-      sendSessionQuestionRevealAnswersEvent(currentQuestionIdx, currentFixationQuestionsAndAnswers[currentQuestionIdx].question);
+      sendSessionQuestionRevealAnswersEvent(
+        webSocket,
+        currentQuestionIdx,
+        fixationSession.code,
+        fixationSession.fixationId,
+        currentFixationQuestionsAndAnswers[currentQuestionIdx].question.questionTxt
+      );
     }
     revealAnswer(true); // todo: handle boolean with settings
   }
 
   const changeSong = (songName: string, artistName: string) => {
-    sendSessionSongChangeEvent(songName, artistName);
+    setLatestUserToAnswer(undefined);
+    setSubmittedAnswer(undefined);
+    setCorrectPlaylistAnswer({
+      song: songName,
+      artist: artistName,
+      album: "" //TODO
+    })
+    sendSessionSongChangeEvent(webSocket, fixationSession.code, fixationSession.fixationId, songName, artistName);
   }
 
   const revealAnswer = (doShow: boolean) => {
     setShowAnswers(doShow);
+  }
+
+  const closeModalCallback = (goToNextQuestionInd: boolean = false) => {
+    setShowAnswerPopup(false);
+    if (goToNextQuestionInd) {
+      if (currentFixation?.spotifyPlaylistId) {
+        // TODO skip from the host
+      }
+      else {
+        goToNextQuestion(1);
+      }
+    }
   }
 
   const getPlaylistOffset = (numberOfSongs: number) => {
@@ -166,74 +178,64 @@ const FixationSessionHost = (props: FixationSessionHostProps) => {
     return getRandomInt(min, max);
   }
 
-  const sendSessionStartedEvent = () => {
-    let message: SessionStartedEvent = {
-      group: fixationSession.code,
-      model: "session_started",
-      payload: {
-        fixation_id: fixationSession.fixationId,
-        room_code: fixationSession.code,
-        session_started: true,
-        multiple_choice_ind: fixationSessionSettings.multipleChoiceInd
+  const handleSocketEvent = (socketMessage: SocketEventReceived) => {
+    console.log(socketMessage.data);
+    if (socketMessage.success && socketMessage.code === fixationSession.code) {
+      let payload = socketMessage.data;
+      switch (socketMessage.event) {
+        case (socketEventNames.SESSION_JOIN): {
+          payload = payload as JoinSessionReceivedEventPayload;
+          handleUserJoined(payload);
+          break;
+        }
+        case (socketEventNames.QUESTION_ANSWERED): {
+          // debugger;
+          payload = payload as QuestionAnsweredSendEventPayload;
+          handleUserAnswered(payload);
+          break;
+        }
+        default: {
+          // TODO: handle more socket events
+          // TODO: handle users joining and set usernames to list so we know what usernames are taken
+          // debugger;
+          return;
+        }
       }
-    };
-    console.log(message);
-    webSocket.send(JSON.stringify({
-      message
-    }));
+    }
+    else {
+      setErrorMessage(socketMessage.message)
+    }
   }
 
-  const sendSessionQuestionChangeEvent = (idx: number, question: FixationQuestion, answers: FixationAnswer[]) => {
-    let message: SessionQuestionChangedEvent = {
-      group: fixationSession.code,
-      model: "session_question_change",
-      payload: {
-        fixation_id: fixationSession.fixationId,
-        room_code: fixationSession.code,
-        question_txt: question.questionTxt,
-        question_idx: idx,
-        answers: answers
-      }
-    };
-    console.log(message);
-    webSocket.send(JSON.stringify({
-      message
-    }));
+  const handleUserAnswered = (payload: QuestionAnsweredSendEventPayload) => {
+    debugger;
+    setLatestUserToAnswer(payload.display_name);
+    if (fixationSessionSettings.stopOnAnswerInd && !submittedAnswer) {
+      console.log(payload);
+      createAndSetSubmittedAnswer(payload.display_name, payload.answer_txt);
+      setShowAnswerPopup(true);
+      revealAnswer(true);
+    }
   }
 
-  const sendSessionSongChangeEvent = (songName: string, artistName: string) => {
-    let message: SessionSongChangedEvent = {
-      group: fixationSession.code,
-      model: "session_song_change",
-      payload: {
-        fixation_id: fixationSession.fixationId,
-        room_code: fixationSession.code,
-        song_name: songName,
-        artist_name: artistName
-      }
-    };
-    console.log(message);
-    webSocket.send(JSON.stringify({
-      message
-    }));
+  const handleUserJoined = (payload: JoinSessionReceivedEventPayload) => {
+    let player: FixationSessionPlayer = {
+      fixationSession: payload.fixation_session,
+      playerSessionId: payload.player_session_id,
+      displayName: payload.display_name
+    }
+    setJoinedUsers([...joinedUsers, player]);
   }
 
-  const sendSessionQuestionRevealAnswersEvent = (idx: number, question: FixationQuestion) => {
-    let message: SessionQuestionRevealAnswersEvent = {
-      group: fixationSession.code,
-      model: "session_question_reveal_answer",
-      payload: {
-        fixation_id: fixationSession.fixationId,
-        room_code: fixationSession.code,
-        question_txt: question.questionTxt,
-        question_idx: idx,
-        do_reveal: true // change to a setting
-      }
-    };
-    console.log(message);
-    webSocket.send(JSON.stringify({
-      message
-    }));
+  const createAndSetSubmittedAnswer = (playerUsername: string, answerTxt: string) => {
+    let correctAnswers = currentFixationAnswers.filter((answer) => answer.correctAnswerInd);
+    let idx = currentFixationAnswers.findIndex(answer => answer.answerTxt === answerTxt);
+    setSubmittedAnswer({
+      playerUsername: playerUsername,
+      submittedAnswerTxt: answerTxt,
+      isCorrectAnswer: correctAnswers.some((answer) => answer.answerTxt === answerTxt && answer.correctAnswerInd),
+      answerIdx: idx > -1 ? idx : undefined
+    });
   }
 
   if (isWaitingToStart) {
@@ -324,6 +326,18 @@ const FixationSessionHost = (props: FixationSessionHostProps) => {
           playlistOffset={currentFixation?.keepShuffled ? getPlaylistOffset(currentFixation.questionCount) : 0}
           goToNextSong={changeSong}
         />
+        {
+          // TODO: handle submitted answer for playlist
+          showAnswerPopup && submittedAnswer
+          ?
+          <FixationSessionAnswerPopup
+            submittedAnswer={submittedAnswer}
+            answers={currentFixationAnswers}
+            closeModalCallback={closeModalCallback}
+          />
+          :
+          null
+        }
       </div>
     );
   }
@@ -345,15 +359,28 @@ const FixationSessionHost = (props: FixationSessionHostProps) => {
         <FixationSessionQuestion
           question={currentFixationQuestionsAndAnswers[currentQuestionIdx].question}
           questionIdx={currentQuestionIdx + 1}
-          answers={currentFixationQuestionsAndAnswers[currentQuestionIdx].answers}
           hasPrevious={currentQuestionIdx > 0}
-          goToNextQuestionCallback={incrementCurrentQuestionIdx}
+          goToNextQuestionCallback={goToNextQuestion}
         />
         <FixationSessionAnswer
           answers={currentFixationAnswers}
           revealAnswers={showAnswers}
           isMultipleChoice={fixationSessionSettings.multipleChoiceInd}
         />
+        <FixationSessionPlayersList players={joinedUsers} lastAnsweredUser={latestUserToAnswer}/>
+        {
+          showAnswerPopup && submittedAnswer
+          ?
+          <div className="pop-up-module" >
+            <FixationSessionAnswerPopup
+              submittedAnswer={submittedAnswer}
+              answers={currentFixationAnswers}
+              closeModalCallback={closeModalCallback}
+            />
+          </div>
+          :
+          null
+        }
       </div>
     )
   }

@@ -16,7 +16,10 @@ import science from '../../assets/icons/science.svg';
 import drama from '../../assets/icons/drama.svg';
 import music from '../../assets/icons/music.svg';
 import puzzle from '../../assets/icons/puzzle.svg';
-import { WelcomeProps } from '../../interfaces/props/Welcome.props';
+
+interface WelcomeProps {
+  isLoggedIn: boolean;
+}
 
 const Welcome = (props: WelcomeProps) => {
   const navigate = useNavigate();

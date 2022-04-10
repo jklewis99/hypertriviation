@@ -1,8 +1,12 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './FixationCard.module.scss';
-import { FixationCardProps } from '../../interfaces/props/FixationCard.props';
 import { Card, CardContent, CardHeader, Rating, Typography } from "@mui/material";
+import { Fixation } from '../../interfaces/Fixation';
+
+interface FixationCardProps {
+  fixation: Fixation
+}
 
 const FixationCard = (props: FixationCardProps) => {
   const navigate = useNavigate();

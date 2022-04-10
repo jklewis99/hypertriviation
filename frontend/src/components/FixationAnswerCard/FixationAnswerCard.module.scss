@@ -1,0 +1,18 @@
+.FixationAnswerCard {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    
+}
+.wrongAnswerCard {
+    background-color: #333 !important;
+    color: black;
+}
+.correctAnswerCard {
+    border: solid 2px white;
+}
+
+.clickable:hover {
+    cursor: pointer;
+}

@@ -7,7 +7,6 @@ import styles from './FixationSessionQuestion.module.scss';
 interface FixationSessionQuestionProps {
   question: FixationQuestion;
   questionIdx: number;
-  answers: FixationAnswer[];
   hasPrevious: boolean;
   goToNextQuestionCallback: (change: number) => void;
 }

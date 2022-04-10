@@ -1,14 +1,13 @@
 import React, { useRef, useState } from 'react';
 import styles from './FixationView.module.scss';
 import { Card, CardContent, CardMedia, CardActions, Typography, Button, Dialog, Rating, Grid, ClickAwayListener, Divider, Tooltip } from "@mui/material";
-import { useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Fixation } from '../../interfaces/Fixation';
 import FixationSettings from '../FixationSettings/FixationSettings';
 import { setFixationSessionSettings, startFixationSession } from '../../services/fixation.service';
 import { SetFixationSessionSettings } from '../../interfaces/payloads/SetFixationSessionSettings.payload';
 import FixationSessionSettings from '../FixationSessionSettings/FixationSessionSettings';
 import { SessionOpenedEvent } from '../../interfaces/websockets/SocketEvents';
-import { socketEventNames } from '../../interfaces/websockets/socketUtils';
 import { HypertriviationUser } from '../../interfaces/HypertriviationUser';
 import { handleInitialWebSocketConnection, sendSessionOpenedEvent, webSocketConnectionString } from '../../websockets/websockets';
 
@@ -56,22 +55,6 @@ const FixationView = (props: FixationViewProps) => {
       .catch((error: Error) => setErrorMessage(error.message))
       .finally(() => handleClosePopup());
   }
-
-  // const sendSessionOpenedEvent = (webSocket: WebSocket, code: string, fixationId: number, username: string) => {
-  //   let message: SessionOpenedEvent = {
-  //     group: code,
-  //     model: socketEventNames.SESSION_OPENED,
-  //     payload: {
-  //       fixation_id: fixationId,
-  //       room_code: code,
-  //       host: username
-  //     }
-  //   };
-  //   console.log(message);
-  //   webSocket.send(JSON.stringify({
-  //     message
-  //   }));
-  // }
 
   return (
     <div className={styles.FixationView} data-testid="FixationView">
@@ -124,45 +107,56 @@ const FixationView = (props: FixationViewProps) => {
         </CardContent>
         <Divider variant="middle" />
         <CardActions className={styles.bottomButtons}>
+          <Button variant="contained" color="secondary" to="/" component={Link}>
+            Back
+          </Button>
           <Button size="medium" variant="contained" color="secondary">Share</Button>
           {
-          selectedFixation.category.toLowerCase() === "music"
-          ?
-          <Tooltip
-          title={ "Must have Spotify authenticated to play this fixation"}
-          placement="top"
+            selectedFixation.category.toLowerCase() === "music"
+            ?
+            <Tooltip
+            title={ "Must have Spotify authenticated to play this fixation"}
+            placement="top"
 
-          >
-            <div>
+            >
+              <div>
 
+              <Button
+                size="medium"
+                variant="contained"
+                color="primary"
+                onClick={openFixationSettings}
+                disabled={!props.isSpotifyAuthenticated} >
+                  
+                Start Fixation
+              </Button>
+              </div>
+            </Tooltip>
+            : 
             <Button
               size="medium"
               variant="contained"
               color="primary"
-              onClick={openFixationSettings}
-              disabled={!props.isSpotifyAuthenticated} >
-                
+              onClick={openFixationSettings} >                
               Start Fixation
             </Button>
-            </div>
-          </Tooltip>
-          : 
-          <Button
-             size="medium"
-             variant="contained"
-             color="primary"
-             onClick={openFixationSettings} >                
-             Start Fixation
-           </Button>
-           }
+          }
         </CardActions>
       </Card>
-      {areSettingsOpen ?
+      {
+        areSettingsOpen
+        ?
         <div>
           <Card className={styles.cardBlock} />
-          <FixationSessionSettings closeModalCallback={handleClosePopup} startFixationCallback={handleStartFixation} />
+          <FixationSessionSettings
+            closeModalCallback={handleClosePopup}
+            startFixationCallback={handleStartFixation}
+            selectedFixation={selectedFixation}
+          />
         </div>
-        : null}
+        :
+        null
+      }
 
     </div>
   );

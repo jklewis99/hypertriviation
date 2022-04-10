@@ -8,7 +8,7 @@ import { SocketEventReceived,
   SessionQuestionChangedEvent,
   SessionQuestionRevealAnswersEventPayload, 
   SessionSongChangedEventPayload} from '../../interfaces/websockets/SocketEvents';
-import { socketEventNames } from '../../interfaces/websockets/socketUtils';
+import { socketEventNames } from '../../websockets/websockets';
 import FixationPlayerJoin from '../FixationPlayerJoin/FixationPlayerJoin';
 import FixationPlayerQuestion from '../FixationPlayerQuestion/FixationPlayerQuestion';
 import styles from './FixationPlayer.module.scss';
@@ -47,44 +47,43 @@ const FixationPlayer = (props: PlayerFixationProps) => {
 
   const handleSocketEvent = (socketMessage: SocketEventReceived) => {
     console.log(socketMessage.data);
-    if (socketMessage.success) {
+    if (socketMessage.success && socketMessage.code === roomCode) {
       let payload = socketMessage.data;
-      if (socketMessage.event === socketEventNames.SESSION_STARTED) {
-        payload = payload as SessionStartedEventPayload;
-        setIsFixationSessionActive(payload.session_started);
-        setMultipleChoiceInd(payload.multiple_choice_ind);
-      }
-      else if (socketMessage.event === socketEventNames.SESSION_QUESTION_CHANGE) {
-        debugger;
-        payload = payload as SessionQuestionChangedEventPayload;
-        if (payload.room_code === roomCode) {
+      switch (socketMessage.event) {
+        case (socketEventNames.SESSION_STARTED): {
+          payload = payload as SessionStartedEventPayload;
+          setIsFixationSessionActive(payload.session_started);
+          setMultipleChoiceInd(payload.multiple_choice_ind);
+          break;
+        }
+        case (socketEventNames.SESSION_QUESTION_CHANGE): {
+          payload = payload as SessionQuestionChangedEventPayload;
           setCurrentQuestion({
             questionId: payload.question_idx,
             questionTxt: payload.question_txt
           });
           setCurrentAnswers(payload.answers);
           setRevealAnswersInd(false);
+          break;
         }
-      }
-      else if (socketMessage.event === socketEventNames.SESSION_SONG_CHANGE) {
-        payload = payload as SessionSongChangedEventPayload;
-        if (payload.room_code === roomCode) {
+        case (socketEventNames.SESSION_SONG_CHANGE): {
+          payload = payload as SessionSongChangedEventPayload;
           setCurrentSong({
             songName: payload.song_name,
             artistName: payload.artist_name
           });
           setRevealAnswersInd(false);
+          break;    
         }
-      }
-      else if (socketMessage.event === socketEventNames.SESSION_QUESTION_REVEAL_ANSWER) {
-        payload = payload as SessionQuestionRevealAnswersEventPayload;
-        if (payload.room_code === roomCode) {
+        case (socketEventNames.SESSION_QUESTION_REVEAL_ANSWER): {
+          payload = payload as SessionQuestionRevealAnswersEventPayload;
           setRevealAnswersInd(payload.do_reveal);
+          break;
         }
-      }
-      else {
-        // TODO: handle users joining and set usernames to list so we know what usernames are taken
-        debugger;
+        default: {
+          // TODO: handle users joining and set usernames to list so we know what usernames are taken
+          debugger;
+        }
       }
     }
   }

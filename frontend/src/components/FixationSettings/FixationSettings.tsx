@@ -11,6 +11,7 @@ import { SetFixationSessionSettings } from '../../interfaces/payloads/SetFixatio
 
 interface FixationSettingsProps {
   setSettingsCallback: (event: any, value?: number) => void;
+  isMusic: boolean;
 }
 
 const FixationSettings = (props: FixationSettingsProps) => {
@@ -24,7 +25,7 @@ const FixationSettings = (props: FixationSettingsProps) => {
 
   const [state, setState] = React.useState({
     isMultipleChoice: false,
-    doShowHints: true,
+    doShowHints: props.isMusic,
     isRandomlyShuffled: true,
     doStopOnAnswer: false,
   });
@@ -45,7 +46,7 @@ const FixationSettings = (props: FixationSettingsProps) => {
 
   return (
     <CardContent>
-      <InputLabel id="demo-simple-select-label">Time Limit</InputLabel>
+      <InputLabel id="time-limit">Time Limit</InputLabel>
       <ToggleButtonGroup
         value={timeLimit}
         exclusive
@@ -80,6 +81,7 @@ const FixationSettings = (props: FixationSettingsProps) => {
                 checked={state.doShowHints}
                 onChange={handleChange}
                 name="doShowHints"
+                disabled={!props.isMusic}
               />}
             label="Show Hints"
           />

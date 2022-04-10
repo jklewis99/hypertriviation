@@ -4,8 +4,8 @@ from concurrent.futures import ThreadPoolExecutor
 from api.db_helper import *
 
 class EventTypes():
-    SESSION_JOIN = "joined"
-    ANSWER_QUESTION = "answer"
+    SESSION_JOIN = "session_joined"
+    QUESTION_ANSWERED = "question_answered"
     SESSION_STARTED = "session_started"
     SESSION_OPENED = "session_opened"
     SESSION_QUESTION_CHANGE = "session_question_change"
@@ -48,7 +48,7 @@ def handle_event(event: dict):
         return (*handle_session_question_changed(payload), group)
     elif (model == EventTypes.SESSION_SONG_CHANGE):
         return (*handle_session_question_changed(payload), group)
-    elif (model == EventTypes.ANSWER_QUESTION):
+    elif (model == EventTypes.QUESTION_ANSWERED):
         return (*handle_answer_question(payload), group)
     elif (model == EventTypes.SESSION_QUESTION_REVEAL_ANSWER):
         return (*handle_session_question_reveal_answers(payload), group)
@@ -141,16 +141,18 @@ def handle_answer_question(payload: dict):
         answer_id = payload["answer_id"]
     if "answer_txt" in payload:
         answer_txt = payload["answer_txt"]
-
-    if validate_player_exists(display_name) and validate_fixation_exists(room_code) and question_id and (answer_id or answer_txt):
+    print(payload)
+    # if validate_player_exists(display_name) and validate_fixation_exists(room_code) and question_id and (answer_id or answer_txt):
+    if True:
         return (True, f"{display_name} answered question {question_id}", payload)
-    return (False,
-            f"Error: one of the following occurred:" +
-            "\n-display_name could not be found," +
-            "\n-room_code could not be found" +
-            "\n-question_id was not provided" +
-            "\n-answer was not provided", 
-            payload)
+    else:
+        return (False,
+                f"Error: one of the following occurred:" +
+                "\n-display_name could not be found," +
+                "\n-room_code could not be found" +
+                "\n-question_id was not provided" +
+                "\n-answer was not provided", 
+                payload)
 
 def handle_session_started(payload: dict):
     """

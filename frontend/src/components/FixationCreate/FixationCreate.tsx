@@ -190,7 +190,7 @@ const FixationCreate: FC<FixationCreateProps> = (props) => {
           </FormControl>
 
         </CardContent>
-        <FixationSettings setSettingsCallback={setSettings} />
+        <FixationSettings setSettingsCallback={setSettings} isMusic={newFixationValues.spotifyPlaylist !== ""}/>
         <CardActions className="card-actions">
           <Button size="medium" variant="contained" color="secondary" onClick={() => navigate(-1)} style={{ margin: "10px 20px" }}>Exit</Button>
           <Button size="medium" variant="contained" color="primary" onClick={setFixationSettings} style={{ margin: "0 20px" }}>
@@ -207,8 +207,7 @@ const FixationCreate: FC<FixationCreateProps> = (props) => {
       {
         isSpotifyPlaylistListOpen
         ?
-        <div>
-          <Card className="pop-up-module" />
+        <div className="pop-up-module" >
           <SpotifyPlaylistList playlists={spotifyPlaylists} closeModalCallback={handleClosePopup} selectPlaylistCallback={selectPlaylist}/>
         </div>
         : null}

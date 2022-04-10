@@ -1,7 +1,10 @@
 import { Button, Card, CardActions, CardContent, CardHeader, Typography } from '@mui/material';
 import React from 'react';
-import { FixationSessionInstructionsProps } from '../../interfaces/props/FixationSessionInstructions.props';
 import styles from './FixationSessionInstructions.module.scss';
+
+interface FixationSessionInstructionsProps {
+  displayFixationQuestionsCallback: () => void;
+}
 
 const FixationSessionInstructions = (props: FixationSessionInstructionsProps) => {
 

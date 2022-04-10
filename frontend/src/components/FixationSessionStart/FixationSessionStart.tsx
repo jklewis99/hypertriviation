@@ -1,7 +1,11 @@
 import React from 'react';
 import styles from './FixationSessionStart.module.scss';
-import { FixationSessionStartProps } from '../../interfaces/props/FixationSessionStart.props';
 import { Card, CardContent, Typography, Button, CardActions } from '@mui/material';
+
+interface FixationSessionStartProps {
+  sessionCode: string;
+  startFixationSessionCallback: () => void;
+}
 
 const FixationSessionStart = (props: FixationSessionStartProps) => {
   return (

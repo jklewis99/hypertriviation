@@ -10,10 +10,13 @@ import spotify from '../../assets/icons/spotify.svg';
 import { ReactComponent as SpotifyIcon } from '../../assets/icons/spotify.svg';
 import { getUser } from '../../services/user.service';
 import { HypertriviationUser } from '../../interfaces/HypertriviationUser';
-import { useNavigate, useLocation } from 'react-router-dom'
-import { UserProfileProps } from '../../interfaces/props/UserProfile.props';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { getPlaylists, setTokens } from '../../services/spotify.service';
 import { spotifyAuthenticated } from '../../utils/constants';
+
+interface UserProfileProps {
+  handleSpotifyAuthenticationCallback: (userId: number) => void;
+}
 
 const UserProfile = (props: UserProfileProps) => {
   const [errorMessage, setErrorMessage] = useState<string>("");

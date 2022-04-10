@@ -63,7 +63,7 @@ class FixationSessionConsumer(AsyncWebsocketConsumer):
             return
         
         print("==="*10)
-        print("SEND MESSAGE:", self.group_name)
+        print("SEND MESSAGE:", event_json)
         print("==="*10)
         success, message, payload_to_emit, _ = handle_event(event_json)
         if session_id and group_name in self.groups:
@@ -75,6 +75,7 @@ class FixationSessionConsumer(AsyncWebsocketConsumer):
                         "event": event_json["model"],
                         "success": success,
                         "message": message,
+                        "code": session_id,
                         "data": payload_to_emit
                     }
                 })
