@@ -173,10 +173,6 @@ const FixationSessionHost = (props: FixationSessionHostProps) => {
   const getPlaylistOffset = (numberOfSongs: number) => {
     return getRandomInt(0, numberOfSongs);
   }
-  
-  const getSongPercentageDurationOffset = (min: number = 0, max: number = 60) => {
-    return getRandomInt(min, max);
-  }
 
   const handleSocketEvent = (socketMessage: SocketEventReceived) => {
     console.log(socketMessage.data);
@@ -208,7 +204,6 @@ const FixationSessionHost = (props: FixationSessionHostProps) => {
   }
 
   const handleUserAnswered = (payload: QuestionAnsweredSendEventPayload) => {
-    debugger;
     setLatestUserToAnswer(payload.display_name);
     if (fixationSessionSettings.stopOnAnswerInd && !submittedAnswer) {
       console.log(payload);
@@ -322,8 +317,9 @@ const FixationSessionHost = (props: FixationSessionHostProps) => {
       <div className={styles.FixationSessionHost} data-testid="FixationSessionHost">
         <MusicPlayer
           spotifyUri={`spotify:playlist:${playlistId}`}
-          songOffset={currentFixation?.spotifyRandomStartInd ? getSongPercentageDurationOffset() : 0}
-          playlistOffset={currentFixation?.keepShuffled ? getPlaylistOffset(currentFixation.questionCount) : 0}
+          playlistOffset={fixationSessionSettings.randomShuffleInd && currentFixation ? getPlaylistOffset(currentFixation.questionCount) : 0}
+          userId={props.hostUser.id}
+          sessionSettings={fixationSessionSettings}
           goToNextSong={changeSong}
         />
         {

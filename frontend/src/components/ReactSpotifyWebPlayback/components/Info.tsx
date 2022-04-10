@@ -3,7 +3,7 @@ import * as React from 'react';
 import { checkTracksStatus, removeTracks, saveTracks } from '../spotify';
 import { Locale, StyledProps, StylesOptions } from '../types/common';
 import { SpotifyPlayerTrack } from '../types/spotify';
-import { Typography } from '@mui/material';
+import { duration, Typography } from '@mui/material';
 import styles from '../ReactSpotifyWebPlayback.module.scss';
 import AlbumCoverHolder from './AlbumCoverHolder';
 import SongInfoReveal from './SongInfoReveal';
@@ -18,12 +18,14 @@ interface Props {
   track: SpotifyPlayerTrack;
   updateSavedStatus?: (fn: (status: boolean) => any) => any;
   timeRemainingMs: number;
-  timeLimit?: number; //TODO
+  duration: number; //TODO
+  showHints: boolean;
 }
 
 interface State {
   isSaved: boolean;
   albumImage: HTMLImageElement | null;
+  duration: number;
 }
 
 export default class Info extends React.PureComponent<Props, State> {
@@ -35,6 +37,7 @@ export default class Info extends React.PureComponent<Props, State> {
     this.state = {
       isSaved: false,
       albumImage: null,
+      duration: props.duration
     };
   }
 
@@ -57,6 +60,12 @@ export default class Info extends React.PureComponent<Props, State> {
   
         await this.setStatus();
       }
+      // else if (track.artists && previousProps.duration !== this.state.duration) {
+        // debugger;
+        this.updateState({
+          duration: Math.min(this.props.duration, this.props.timeRemainingMs),
+        })
+      
       this.setImage();
     }
 
@@ -116,16 +125,16 @@ export default class Info extends React.PureComponent<Props, State> {
     return (
       <div className={styles.mediaPlayer}>
         {image && (
-          <AlbumCoverHolder id="album-image" alt={name} src={image} timeLimit={30} timeRemaining={this.props.timeRemainingMs}/>
+          <AlbumCoverHolder id="album-image" alt={name} src={image} durationMs={this.state.duration} doShow={this.props.showHints}/>
         )}
         {!!name && (
           <div>
-            <SongInfoReveal variant='h5' name={name} timeLimit={30} revealPace={Math.floor(this.props.timeRemainingMs / name.length)}/>
+            <SongInfoReveal variant='h5' name={name} duration={this.state.duration} revealPace={Math.floor(this.state.duration / (name.length || 1))} doShow={this.props.showHints} />
             <span style={{fontSize: "1em"}}>Song Title</span>
             {/* <Typography variant='h6'>
               {name}
             </Typography> */}
-            <SongInfoReveal variant='h6' name={artistNames} timeLimit={30} revealPace={Math.floor(this.props.timeRemainingMs / artistNames.length)}/>
+            <SongInfoReveal variant='h6' name={artistNames} duration={this.state.duration} revealPace={Math.floor(this.state.duration / (artistNames.length || 1))} doShow={this.props.showHints}/>
             <span>Artist/Composer</span>
           </div>
         )}

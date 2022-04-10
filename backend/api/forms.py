@@ -3,7 +3,7 @@ from django.forms import ModelForm
 
 from authentication.models import HypertriviationUser
 
-from .models import Fixation, FixationAnswer, FixationCategory, FixationQuestion
+from .models import Fixation, FixationAnswer, FixationCategory, FixationQuestion, FixationSession, FixationSessionSettings, TimeLimitOptions
 
 class FixationForm(forms.Form):
     created_by = forms.ModelChoiceField(HypertriviationUser.objects.all(), required=True)
@@ -85,3 +85,27 @@ class FixationAnswerForm(forms.Form):
     
     def __init__(self, *args, **kwargs):
         super(FixationAnswerForm, self).__init__(*args, **kwargs)
+
+
+class FixationSessionSettingsForm(forms.Form):
+    fixation_session = forms.ModelChoiceField(FixationSession.objects.all())
+    show_hints_ind = forms.BooleanField(required=False)
+    multiple_choice_ind = forms.BooleanField(required=False)
+    random_shuffle_ind = forms.BooleanField(required=False)
+    stop_on_answer_ind = forms.BooleanField(required=False)
+    spotify_random_start_ind = forms.BooleanField(required=False)
+    time_limit = forms.ChoiceField(choices=TimeLimitOptions.choices, required=False)
+    
+    class Meta:
+        model = FixationSessionSettings
+        fields = (
+            'question',
+            'answer_txt',
+            'correct_answer_ind',
+            'created_by',
+            'created_at', 
+            'updated_at'
+        )
+    
+    def __init__(self, *args, **kwargs):
+        super(FixationSessionSettingsForm, self).__init__(*args, **kwargs)

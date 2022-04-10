@@ -2,13 +2,13 @@ import ClickAwayListener from '@mui/base/ClickAwayListener';
 import { Button, Card, CardActions } from '@mui/material';
 import React from 'react';
 import FixationSettings from '../FixationSettings/FixationSettings';
-import { SetFixationSessionSettings } from '../../interfaces/payloads/SetFixationSessionSettings.payload';
+import { SetFixationSessionSettingsPayload } from '../../interfaces/payloads/SetFixationSessionSettings.payload';
 import styles from './FixationSessionSettings.module.scss';
 import { Fixation } from '../../interfaces/Fixation';
 
 interface FixationSessionSettingsProps {
   closeModalCallback: () => void;
-  startFixationCallback: (settings: SetFixationSessionSettings) => void;
+  startFixationCallback: (settings: SetFixationSessionSettingsPayload) => void;
   selectedFixation: Fixation;
 }
 
@@ -18,6 +18,7 @@ const FixationSessionSettings = (props: FixationSessionSettingsProps) => {
     doShowHints: true,
     isRandomlyShuffled: true,
     doStopOnAnswer: false,
+    isSpotifyRandomStart: false,
     timeLimit: 30,
   });
 
@@ -36,12 +37,13 @@ const FixationSessionSettings = (props: FixationSessionSettingsProps) => {
   };
 
   const setFixationSettings = () => {
-    let fixationSettings: SetFixationSessionSettings = {
-      fixation_session_code: "", // does not exist yet
+    let fixationSettings: SetFixationSessionSettingsPayload = {
+      fixation_session: -1, // does not exist yet
       show_hints_ind: state.doShowHints,
       multiple_choice_ind: state.isMultipleChoice,
       random_shuffle_ind: state.isRandomlyShuffled,
       stop_on_answer_ind: state.doStopOnAnswer,
+      spotify_random_start_ind: state.isSpotifyRandomStart,
       time_limit: state.timeLimit
     }
     props.startFixationCallback(fixationSettings);

@@ -132,7 +132,7 @@ class SpotifyWebPlayer extends React.PureComponent<Props, State> {
       track: this.emptyTrack,
       volume: parseVolume(props.initialVolume) || 1,
       isFirstPlay: true,
-      initialTimeRemainingMs: 0
+      initialTimeRemainingMs: (props.durationMs)
     };
 
     this.styles = getMergedStyles(props.styles);
@@ -911,7 +911,7 @@ class SpotifyWebPlayer extends React.PureComponent<Props, State> {
 
     if (isReady) {
       /* istanbul ignore else */
-      if (!info && initialTimeRemainingMs > 0) {
+      if (!info && initialTimeRemainingMs > -1) {
         info = (
           <Info
             isActive={isActive}
@@ -923,6 +923,8 @@ class SpotifyWebPlayer extends React.PureComponent<Props, State> {
             track={track}
             updateSavedStatus={updateSavedStatus}
             timeRemainingMs={initialTimeRemainingMs}
+            duration={this.props.durationMs}
+            showHints={this.props.showHints}
           />
         );
       }

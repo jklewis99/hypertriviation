@@ -1,12 +1,21 @@
-# Building Full-Stack _Hypertriviation_
+# Hypertriviation
+Where trivia nerds and music and movie lovers can come to
+annoy each other with random facts and knowledge.
 
-## Running Locally
+## Examples
+### Music Fixation
+![Music Trivia](docs/videos/fixation-music.gif)
+
+### Regular Fixation
+![Music Trivia](docs/videos/fixation-regular.gif)
+
+## Getting Started
 Prerequisites:
 - Python (3.9.x)
 - Node (14.17.x)
 - Docker (20.10.x)
 
-## Getting Started
+
 Ensure you have Python 3.9 installed. You can use pip or anaconda. You can download the latest version [here](https://www.python.org/downloads/).
 Also ensure you have Docker installed. You can download the latest version [for Windows](https://docs.docker.com/desktop/windows/install/)
 ### 1. Clone the repository

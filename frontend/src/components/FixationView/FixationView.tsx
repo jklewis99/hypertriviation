@@ -5,7 +5,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Fixation } from '../../interfaces/Fixation';
 import FixationSettings from '../FixationSettings/FixationSettings';
 import { setFixationSessionSettings, startFixationSession } from '../../services/fixation.service';
-import { SetFixationSessionSettings } from '../../interfaces/payloads/SetFixationSessionSettings.payload';
+import { SetFixationSessionSettingsPayload } from '../../interfaces/payloads/SetFixationSessionSettings.payload';
 import FixationSessionSettings from '../FixationSessionSettings/FixationSessionSettings';
 import { SessionOpenedEvent } from '../../interfaces/websockets/SocketEvents';
 import { HypertriviationUser } from '../../interfaces/HypertriviationUser';
@@ -32,11 +32,11 @@ const FixationView = (props: FixationViewProps) => {
     setAreSettingsOpen(false);
   };
 
-  const handleStartFixation = (fixationSessionSettings: SetFixationSessionSettings) => {
+  const handleStartFixation = (fixationSessionSettings: SetFixationSessionSettingsPayload) => {
 
     startFixationSession(selectedFixation.id, 1, undefined)
       .then((session) => {
-        fixationSessionSettings.fixation_session_code = session.code;
+        fixationSessionSettings.fixation_session = session.fixationId;
         setFixationSessionSettings(fixationSessionSettings)
           .then((settings) => {
             console.log(settings);

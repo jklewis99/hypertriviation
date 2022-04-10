@@ -6,20 +6,21 @@ import { FixationSession } from "../interfaces/FixationSession";
 import { FixationSessionPlayer } from "../interfaces/FixationSessionPlayer";
 import { FixationSessionSettings } from "../interfaces/FixationSessionSettings";
 import { FixationSessionUser } from "../interfaces/FixationSessionUser";
+import { NewFixationValues } from "../interfaces/NewFixationValues";
 import { FixationAnswerPayload } from "../interfaces/payloads/FixationAnswer.payload";
-import { SetFixationSessionSettings } from "../interfaces/payloads/SetFixationSessionSettings.payload";
+import { SetFixationSessionSettingsPayload } from "../interfaces/payloads/SetFixationSessionSettings.payload";
 import httpClient, { getAuthorizationHeader } from "../utils/httpClient";
 
 const relativePath = "api/fixations";
 
-export function createFixation(fixation: any): Promise<Fixation> {
+export function createFixation(fixation: NewFixationValues): Promise<Fixation> {
   const requestOptions = {
     "created_by": fixation.createdBy,
     "fixation_title": fixation.title,
     "category": fixation.category,
     "description": fixation.description,
     "img_url": fixation.imgUrl,
-    "keep_shuffled": true,
+    "keep_shuffled": fixation.randomShuffleInd,
     "spotify_playlist_id": fixation.spotifyPlaylist
   };
   return new Promise((resolve, reject) => {
@@ -75,7 +76,7 @@ export function getFixation(fixationId: number): Promise<Fixation> {
 export function getFixationQuestion(questionId: number): Promise<FixationQuestion> {
   return new Promise((resolve, reject) => {
     httpClient.get(
-      `${relativePath}/question/${questionId}`,
+      `${relativePath}/question?question_id=${questionId}`,
       getAuthorizationHeader()
     )
       .then(response => {
@@ -168,7 +169,7 @@ export function setFixationQuestionAnswers(questionId: number): Promise<string> 
   });
 }
 
-export function setFixationSessionSettings(settings: SetFixationSessionSettings): Promise<FixationSessionSettings> {
+export function setFixationSessionSettings(settings: SetFixationSessionSettingsPayload): Promise<FixationSessionSettings> {
   return new Promise((resolve, reject) => {
     httpClient.post(
       `${relativePath}/set-settings`,

@@ -95,7 +95,7 @@ class FixationAnswer(models.Model):
     """
     Stores a single fixation answer entry, which defines a possible fixation answer
     """
-    question = models.ForeignKey(FixationQuestion, null=True, on_delete=models.CASCADE)
+    question = models.ForeignKey(FixationQuestion, related_name='answers', null=True, on_delete=models.CASCADE)
     answer_txt = models.CharField(max_length=512, null=False)
     correct_answer_ind = models.BooleanField(default=True)
     created_by = models.ForeignKey(HypertriviationUser, on_delete=models.CASCADE)
@@ -107,7 +107,7 @@ class FixationAnswer(models.Model):
 
 class FixationSession(models.Model):
     """
-    Stores a single fixation session entry, which continas the real time metadata for a trivia session
+    Stores a single fixation session entry, which contains the real time metadata for a trivia session
     """
     code = models.CharField(
         max_length=8, default=generate_unique_code, unique=True)
@@ -150,6 +150,7 @@ class FixationSessionSettings(models.Model):
     multiple_choice_ind = models.BooleanField(null=False, default=True)
     random_shuffle_ind = models.BooleanField(null=False, default=True)
     stop_on_answer_ind = models.BooleanField(null=False, default=False)
+    spotify_random_start_ind = models.BooleanField(null=True, default=False)
     time_limit = models.IntegerField(choices=TimeLimitOptions.choices, default=TimeLimitOptions.UNLIMITED)
     active_ind = models.BooleanField(null=False, default=True)
     created_ts = models.DateTimeField(auto_now_add=True)

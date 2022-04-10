@@ -1,8 +1,9 @@
 import { Button, Card, CardActions, CardContent, CardHeader, Divider, FormControl, FormControlLabel, FormGroup, Input, InputLabel, Switch, TextField, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
 import React, { FC, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { NewFixationValues } from '../../interfaces/NewFixationValues';
 import { Playlist, PlaylistsResponse } from '../../interfaces/payloads/Playlists.payload';
-import { SetFixationSessionSettings } from '../../interfaces/payloads/SetFixationSessionSettings.payload';
+import { SetFixationSessionSettingsPayload } from '../../interfaces/payloads/SetFixationSessionSettings.payload';
 import { createFixation } from '../../services/fixation.service';
 import { getPlaylists } from '../../services/spotify.service';
 import FixationSettings from '../FixationSettings/FixationSettings';
@@ -18,18 +19,21 @@ const FixationCreate: FC<FixationCreateProps> = (props) => {
   const navigate = useNavigate();
   const [fixationCategory, setFixationCategory] = useState<string>();
   // TODO: Change to Interface or user Fixation interface
-  const [newFixationValues, setNewFixationValues] = useState({
+  const [newFixationValues, setNewFixationValues] = useState<NewFixationValues>({
     title: "",
     description: "",
     imgUrl: "",
     spotifyPlaylist: "",
-    createdBy: props.userId
+    createdBy: props.userId,
+    category: "",
+    randomShuffleInd: false
   });
   const [newFixationSettings, setNewFixationSettings] = useState({
     isMultipleChoice: false,
     doShowHints: true,
     isRandomlyShuffled: true,
     doStopOnAnswer: false,
+    isSpotifyRandomStart: false,
     timeLimit: 30,
   });  
   const [isSpotifyPlaylistListOpen, setIsSpotifyPlaylistListOpen] = useState<boolean>(false);
@@ -46,7 +50,8 @@ const FixationCreate: FC<FixationCreateProps> = (props) => {
   const setSettings = (event: any, value?: number) => {
     if (value) {
       setNewFixationSettings({
-        ...newFixationSettings, timeLimit: value
+        ...newFixationSettings,
+        timeLimit: value
       })
     }
     else {
@@ -72,16 +77,7 @@ const FixationCreate: FC<FixationCreateProps> = (props) => {
   }
 
   const setFixationSettings = () => {
-    let fixationSettings: SetFixationSessionSettings = {
-      fixation_session_code: "", // does not exist yet
-      show_hints_ind: newFixationSettings.doShowHints,
-      multiple_choice_ind: newFixationSettings.isMultipleChoice,
-      random_shuffle_ind: newFixationSettings.isRandomlyShuffled,
-      stop_on_answer_ind: newFixationSettings.doStopOnAnswer,
-      time_limit: newFixationSettings.timeLimit
-    };
-    console.log(fixationSettings);
-    createFixation({...newFixationValues, category: fixationCategory})
+    createFixation(newFixationValues)
       .then((fixation) => {
         if (fixation.category !== "Music") {
           navigate(`/fixations/create/${fixation.id}`, { state: [fixation.id , 1] }); // TODO: pass id in only one place
@@ -93,14 +89,15 @@ const FixationCreate: FC<FixationCreateProps> = (props) => {
       .catch((error: Error) => {
         console.log(error.message);
       });
-    // props.startFixationCallback(fixationSettings);
   }
 
   const handleChange = (prop: any, event: any) => {
     setNewFixationValues({ ...newFixationValues, [prop]: event.target.value });
   }
 
-  const handleCategoryChange = (event: any, value: string) => setFixationCategory(value);
+  const handleCategoryChange = (event: any, value: string) => {
+    setNewFixationValues({ ...newFixationValues, category: value });
+  }
 
   const handleClosePopup = () => setIsSpotifyPlaylistListOpen(false);
 
@@ -119,7 +116,7 @@ const FixationCreate: FC<FixationCreateProps> = (props) => {
         <CardContent>
           <InputLabel id="demo-simple-select-label">Category Type</InputLabel>
           <ToggleButtonGroup
-            value={fixationCategory}
+            value={newFixationValues.category}
             exclusive
             onChange={handleCategoryChange}
             aria-label="category type"
@@ -134,7 +131,7 @@ const FixationCreate: FC<FixationCreateProps> = (props) => {
               ))
             }
           </ToggleButtonGroup>
-          {fixationCategory === "Music"
+          {newFixationValues.category === "Music"
             ?
             <CardContent >
               {
@@ -183,8 +180,6 @@ const FixationCreate: FC<FixationCreateProps> = (props) => {
               required
               className={styles.inputs}
               value={newFixationValues.imgUrl}
-              // multiline
-              // maxRows={4}
               onChange={(event) => handleChange("imgUrl", event)}
             />
           </FormControl>
@@ -195,7 +190,7 @@ const FixationCreate: FC<FixationCreateProps> = (props) => {
           <Button size="medium" variant="contained" color="secondary" onClick={() => navigate(-1)} style={{ margin: "10px 20px" }}>Exit</Button>
           <Button size="medium" variant="contained" color="primary" onClick={setFixationSettings} style={{ margin: "0 20px" }}>
             {
-              fixationCategory === "Music"
+              newFixationValues.category === "Music"
               ?
               "Create"
               : 

@@ -3,19 +3,22 @@ import { Button, Card, Grid, IconButton, LinearProgress, Typography } from '@mui
 import React, { useEffect, useState } from 'react';
 import styles from './MusicPlayer.module.scss';
 import SpotifyPlayer, { CallbackState } from '../ReactSpotifyWebPlayback/index';
-import { getTokens, setToShuffle } from '../../services/spotify.service';
+import { getSpotifyTokens, setToShuffle } from '../../services/spotify.service';
 import { CurrentSong } from '../../interfaces/CurrentSong';
 import { idConstants } from '../../utils/constants';
+import { FixationSessionSettings } from '../../interfaces/FixationSessionSettings';
+import { getRandomInt } from '../../utils/randomFunctions';
 
 interface MusicPlayerProps {
   spotifyUri: string;
   playlistOffset: number;
-  songOffset: number;
+  userId: number;
+  sessionSettings: FixationSessionSettings;
   goToNextSong: (songName: string, artistsName: string) => void;
 }
 
 const MusicPlayer = (props: MusicPlayerProps) => {
-  const [token, setToken] = useState("");
+  const [spotifyToken, setSpotifyToken] = useState("");
   const [currentSong, setCurrentSong] = useState<CurrentSong>();
   const [deviceId, setDeviceId] = useState("");
   const spotifyPlayerClass = "PlayerRSWP";
@@ -25,15 +28,20 @@ const MusicPlayer = (props: MusicPlayerProps) => {
   let isFirstPlay = true;
   const spotifyUri = props.spotifyUri;
   const playlistOffset = props.playlistOffset;
-  const songOffset = props.songOffset;
 
   useEffect(() => {
     console.log("MUSIC PROPS: ", playlistOffset, songOffset);
-    getTokens(1).then((data) => {
-      setToken(data.accessToken);
+    getSpotifyTokens(props.userId).then((data) => {
+      setSpotifyToken(data.accessToken);
     })
       .catch((error: Error) => console.log(error.message));
   }, [])
+
+  const getSongPercentageDurationOffset = (min: number = 0, max: number = 60) => {
+    return getRandomInt(min, max);
+  }
+  const songOffset = props.sessionSettings.spotifyRandomStartInd ? getSongPercentageDurationOffset() : 0;
+  
 
   const aCallback = (state: CallbackState) => {
     console.log(state);
@@ -74,15 +82,22 @@ const MusicPlayer = (props: MusicPlayerProps) => {
   }
 
   const shuffle = () => {
-    debugger;
     setTimeout( () => setToShuffle(true).then((response) => { console.log(response); return; }), 2000);
   }
 
   return (
     <div className={styles.MusicPlayer} data-testid="MusicPlayer">
       <Card>
-        {token !== "" ?
-          <SpotifyPlayer token={token} uris={spotifyUri} callback={aCallback} offset={playlistOffset} position={songOffset}/>
+        {spotifyToken !== "" ?
+          <SpotifyPlayer
+            token={spotifyToken}
+            uris={spotifyUri}
+            callback={aCallback}
+            offset={playlistOffset}
+            position={songOffset}
+            durationMs={props.sessionSettings.timeLimit * 1000}
+            showHints={props.sessionSettings.showHintsInd}
+          />
           :
           null}
 
