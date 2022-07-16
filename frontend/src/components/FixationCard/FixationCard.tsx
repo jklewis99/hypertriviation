@@ -1,15 +1,18 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './FixationCard.module.scss';
-import { Card, CardContent, CardHeader, Rating, Typography } from "@mui/material";
+import { Box, Button, Card, CardActions, CardContent, CardHeader, CardMedia, Divider, IconButton, Rating, Typography } from "@mui/material";
 import { Fixation } from '../../interfaces/Fixation';
+import { Info, PlayArrow, Share } from '@mui/icons-material';
 
 interface FixationCardProps {
-  fixation: Fixation
+  fixation: Fixation;
+  orientation?: boolean;
 }
 
 const FixationCard = (props: FixationCardProps) => {
   const navigate = useNavigate();
+  const [showInfo, setShowInfo] = useState<boolean>(false);
 
   const backgroundImage = {
     backgroundImage: `url(${props.fixation.imgUrl})`,
@@ -30,38 +33,65 @@ const FixationCard = (props: FixationCardProps) => {
   }
 
   return (
-    <div className={styles.SessionCard} data-testid="SessionCard" onClick={goToFixationStart}>
-      <div className={styles.flipCard}>
-        <div className={styles.flipCardInner}>
-          <Card
-            className={styles.flipCardFront}
-            style={backgroundImage}>
-            <CardHeader
-              title={props.fixation.fixationTitle}
-              subheader={props.fixation.createdBy}
-              titleTypographyProps={{
-                align: 'center',
-                // justifyContent: 'center',
-                className: styles.cardInfoBackground
-              }}
-              subheaderTypographyProps={{
-                align: 'center',
-                // justifyContent: 'center',
-                className: styles.cardInfoBackground
-              }}
-            />
-            {/* <Rating name="half-rating-read" defaultValue={props.fixation.rating} precision={0.5} readOnly /> */}
-          </Card>
-          <Card className={styles.flipCardBack} style={darkenedBackgroundImage}>
-            <CardContent>
-              <Typography>
-              {props.fixation.description}
-                </Typography>
-            </CardContent>
-            
-          </Card>
-        </div>
-      </div>
+    <div className={styles.SessionCard} data-testid="SessionCard">
+      
+      <Card
+        className={styles.largeCard}
+      >
+        {
+        !showInfo
+        ? 
+        <CardMedia
+          component="img"
+          sx={{ width: "100%" }}
+          height="60%"
+          image={props.fixation.imgUrl}
+          alt={props.fixation.fixationTitle + " img"}
+        />
+        :
+        null
+        }
+        {
+        !showInfo
+        ? 
+        <Box
+          sx={{
+              width: "100%",
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "center",
+              alignItems: "center",
+              overflow: "ellipsis",
+              padding: "8px 2px"
+            }}
+        >
+          <Typography width={"100%"} variant='subtitle2' noWrap>
+            {props.fixation.fixationTitle}
+          </Typography>
+          <Divider variant="middle" />
+          <Typography width={"100%"} variant='caption' color={"#838383"}>
+            {props.fixation.createdBy}
+          </Typography>
+        </Box>
+        :
+        <CardContent>
+          <Typography>
+          {props.fixation.description}
+            </Typography>
+        </CardContent>
+        }
+        <CardActions style={{padding: "0 5px"}} className={'card-actions-spread'}>
+          <IconButton  size="small" onClick={() => setShowInfo(!showInfo)}>
+            <Info fontSize="small" />
+          </IconButton>
+          {/* <IconButton  size="small" disabled>
+            <Share />
+          </IconButton> */}
+          <IconButton size="small">
+            <PlayArrow onClick={goToFixationStart}/>
+          </IconButton>
+        </CardActions>
+      </Card>
     </div>
   );
 }

@@ -44,16 +44,16 @@ const FixationList = () => {
           Choose a Trivia Session
         </Typography>
         <Divider/>
-        <Box style={{overflowY: "scroll", overflowX: "visible", flex: "1",  width: "100%"}}>
+        <Box style={{overflowY: "scroll", flex: "1",  width: "100%"}}>
           {
             isLoading
               ?
               <Loader />
               :
-              <Grid container spacing={2} >
+              <Grid container spacing={2} sx={{display: "flex", justifyContent: "center"}}>
                 {
                   fixations.map((fixation: Fixation, i: number) => (
-                    <Grid item xs={(i % 4) % 3 === 0 ? 8 : 4} padding="16px">
+                    <Grid item>
                       <FixationCard
                       fixation={fixation}
                         key={Math.floor(Date.now() + i)}
