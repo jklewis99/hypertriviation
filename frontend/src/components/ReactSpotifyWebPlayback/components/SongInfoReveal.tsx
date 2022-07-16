@@ -7,8 +7,9 @@ import styles from '../ReactSpotifyWebPlayback.module.scss';
 interface Props {
   variant: "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | "subtitle1" | "subtitle2" | "body1" | "body2" | "caption" | "button" | "overline" | "inherit" | undefined;
   name: string;
-  timeLimit: number;
+  duration: number;
   revealPace: number;
+  doShow: boolean;
 }
 
 const SongInfoReveal = (props: Props) => {
@@ -35,6 +36,9 @@ const SongInfoReveal = (props: Props) => {
   }, [props.name])
 
   const showCharacter = () => {
+    if (!props.doShow) {
+      return
+    }
     let ind = charOrderToRemove?.pop() as number;
     //@ts-ignore
     displayName[ind] = nameCharArray[ind];

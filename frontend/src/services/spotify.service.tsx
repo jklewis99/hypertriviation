@@ -50,7 +50,7 @@ export function setTokens(requestBody: {[key: string]: string | number}) {
   });
 }
 
-export function getTokens(userId: number): Promise<any> {
+export function getSpotifyTokens(userId: number): Promise<any> {
   return new Promise((resolve, reject) => {
     httpClient.get(
       `${relativePath}/get-tokens?userId=${userId}`,

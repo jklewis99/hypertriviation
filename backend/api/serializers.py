@@ -1,26 +1,5 @@
 from rest_framework import serializers
-from .models import Fixation, FixationAnswer, FixationQuestion, FixationSession, FixationSessionPlayer, FixationSessionSettings, Room, User
-
-
-class RoomSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Room
-        fields = ('id', 'code', 'host', 'guest_can_pause',
-                  'votes_to_skip', 'created_at')
-
-class CreateRoomSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Room
-        fields = ('guest_can_pause', 'votes_to_skip')
-
-class UpdateRoomSerializer(serializers.ModelSerializer):
-    # redefine code field so we reference a "different" code field (code won't be unique in this request)
-    code = serializers.CharField(validators=[])
-
-    class Meta:
-        model = Room
-        fields = ('guest_can_pause', 'votes_to_skip', 'code')
-
+from .models import Fixation, FixationAnswer, FixationQuestion, FixationSession, FixationSessionPlayer, FixationSessionSettings, Room, TimeLimitOptions, User
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -48,23 +27,7 @@ class FixationSerializer(serializers.ModelSerializer):
             'updated_at'
         )
 
-class FixationQuestionSerializer(serializers.ModelSerializer):
-    fixation_id = serializers.IntegerField(source='fixation.id')
-    class Meta:
-        model = FixationQuestion
-        fields = (
-            'id',
-            'fixation_id',
-            'question_idx', 
-            'question_txt',
-            'multiple_choice_ind', 
-            'img_url',
-            'video_playback_url',
-            'created_by',
-            'question_category',
-            'created_at', 
-            'updated_at'
-        )
+
 
 class FixationAnswerSerializer(serializers.ModelSerializer):
     question_id = serializers.IntegerField(source='question.id')
@@ -80,6 +43,26 @@ class FixationAnswerSerializer(serializers.ModelSerializer):
             'updated_at'
         )
 
+class FixationQuestionSerializer(serializers.ModelSerializer):
+    fixation_id = serializers.IntegerField(source='fixation.id')
+    answers = FixationAnswerSerializer(many=True)
+
+    class Meta:
+        model = FixationQuestion
+        fields = (
+            'id',
+            'fixation_id',
+            'question_idx', 
+            'question_txt',
+            'multiple_choice_ind', 
+            'img_url',
+            'video_playback_url',
+            'created_by',
+            'question_category',
+            'created_at', 
+            'updated_at',
+            'answers'
+        )
 class FixationSessionSerializer(serializers.ModelSerializer):
     fixation_id = serializers.CharField(source='fixation.id')
     class Meta:
@@ -102,9 +85,19 @@ class GetFixationSessionPlayersSerializer(serializers.ModelSerializer):
         fields = ('fixation_session_code', 'display_name', 'player_session_id', 'active_ind', 'added_at')
 
 class FixationSessionSettingsSerializer(serializers.ModelSerializer):
-    fixation_session_code = serializers.CharField(source='fixation_session.code')
+    # fixation_session = FixationSessionSerializer(read_only=True)
+    # fixation_session_id = serializers.IntegerField(source='fixation_session.id')
+    fixation_session_code = serializers.CharField(source='fixation_session.code', required=False)
+    show_hints_ind = serializers.BooleanField(required=False)
+    multiple_choice_ind = serializers.BooleanField(required=False)
+    random_shuffle_ind = serializers.BooleanField(required=False)
+    stop_on_answer_ind = serializers.BooleanField(required=False)
+    spotify_random_start_ind = serializers.BooleanField(required=False)
+    time_limit = serializers.ChoiceField(choices=TimeLimitOptions.choices, required=False)
+
     class Meta:
         model = FixationSessionSettings
-        fields = ('fixation_session_code', 'show_hints_ind', 'multiple_choice_ind', 'random_shuffle_ind',
-                    'stop_on_answer_ind', 'time_limit', 'active_ind', 'created_ts')
+        fields = ('fixation_session_code', 'fixation_session', 'show_hints_ind', 'multiple_choice_ind', 'random_shuffle_ind',
+                    'stop_on_answer_ind', 'spotify_random_start_ind', 'time_limit', 'active_ind', 'created_ts')
+        extra_kwargs = {'fixation_session': {'write_only': True}}
 
