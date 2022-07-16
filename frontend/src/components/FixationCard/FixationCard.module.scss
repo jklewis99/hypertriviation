@@ -20,10 +20,6 @@
 
     .flipCard:hover .flipCardInner {
         transform: rotateY(180deg);
-    }
-
-    /* Do an horizontal flip when you move the mouse over the flip box container */
-    .flipCard:hover .flipCardInner {
         transform: rotateX(180deg);
     }
 

@@ -39,10 +39,7 @@ const AppRouter = () => {
     if (localStorage.getItem(accessToken) && localStorage.getItem(refreshToken)) {
       getUser()
       .then((user)=> {
-        setIsLoggedIn(true);
-        setUser(user);
-        setIsSpotifyAuthenticated(user.spotifyAuthenticatedInd);
-        localStorage.setItem(spotifyAuthenticated, String(user.spotifyAuthenticatedInd));
+        handleSignedInUser(user);
       })
       .catch((error: Error) => {
         console.log(error.message)
@@ -75,6 +72,13 @@ const AppRouter = () => {
 
   const handleWebSocketConnection = (newWebSocket: WebSocket) => {
     setWebSocket(newWebSocket);
+  }
+
+  const handleSignedInUser = (user: HypertriviationUser) => {
+    setIsLoggedIn(true);
+    setUser(user);
+    setIsSpotifyAuthenticated(user.spotifyAuthenticatedInd);
+    localStorage.setItem(spotifyAuthenticated, String(user.spotifyAuthenticatedInd));
   }
 
   return (
@@ -117,7 +121,7 @@ const AppRouter = () => {
             null
           }
           <Route path="/live" element={<FixationPlayer/>} />
-          <Route path="/user/access" element={<UserForm/>}/>
+          <Route path="/user/access" element={<UserForm handleSignedInUser={handleSignedInUser}/>}/>
           <Route path="/user/myaccount" element={<UserProfile handleSpotifyAuthenticationCallback={authenticateSpotify}/>}/>
           
         </Routes>

@@ -8,10 +8,15 @@ import {
 // import Visibility from '@mui/icons-material/Visibility';
 // import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import { Error, VisibilityOff, Visibility, PeopleAlt, Close } from '@mui/icons-material';
-import { login, register } from '../../services/user.service';
+import { login, register, getUser } from '../../services/user.service';
 import { useNavigate } from 'react-router';
+import { HypertriviationUser } from '../../interfaces/HypertriviationUser';
 
-const UserForm = () => {
+interface UserFormProps {
+  handleSignedInUser: (user: HypertriviationUser) => void;
+}
+
+const UserForm = (props: UserFormProps) => {
   const [errorMessage, setErrorMessage] = useState<string>("");
   const [showErrorMessage, setShowErrorMessage] = useState<boolean>(true);
   const [isRegistrataion, setIsRegistrataion] = useState<boolean>(false);
@@ -97,6 +102,19 @@ const UserForm = () => {
     return true;
   }
 
+  const updateUserAndNavigate = (accessToken: string, refreshToken: string) => {
+    localStorage.setItem('accessToken', accessToken);
+    localStorage.setItem('refreshToken', refreshToken);
+    getUser()
+      .then((user) => {
+        props.handleSignedInUser(user);
+        navigate("/user/myaccount");
+      })
+      .catch((error: Error) => {
+        console.log(error.message);
+      })
+  }
+
   const handleSubmit = (event: any) => {
     event.preventDefault();
     if (!isValid()) return;
@@ -104,9 +122,7 @@ const UserForm = () => {
     if (isRegistrataion){
       register(values.username, values.password, values.email, values.firstName, values.lastName)
         .then((data) => {
-          localStorage.setItem('accessToken', data.access);
-          localStorage.setItem('refreshToken', data.refresh);
-          navigate("/user/myaccount");
+          updateUserAndNavigate(data.access, data.refresh);
         })
         .catch((error: Error) => {
           setErrorMessage(error.message);
@@ -117,9 +133,7 @@ const UserForm = () => {
       login(values.username, values.password)
         .then((data) => {
           if (data) {
-            localStorage.setItem('accessToken', data.access);
-            localStorage.setItem('refreshToken', data.refresh);
-            navigate("/user/myaccount");
+            updateUserAndNavigate(data.access, data.refresh);
           }
           else {
             setErrorMessage("No user found.");

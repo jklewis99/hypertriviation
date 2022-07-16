@@ -53,7 +53,7 @@ const FixationList = () => {
               <Grid container spacing={2} >
                 {
                   fixations.map((fixation: Fixation, i: number) => (
-                    <Grid item xs={(i % 4) % 3 === 0 ? 8 : 4}>
+                    <Grid item xs={(i % 4) % 3 === 0 ? 8 : 4} padding="16px">
                       <FixationCard
                       fixation={fixation}
                         key={Math.floor(Date.now() + i)}
